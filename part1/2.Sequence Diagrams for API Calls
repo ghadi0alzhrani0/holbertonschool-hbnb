@@ -1,11 +1,9 @@
-# 2. Sequence Diagrams for API Calls
-
-## 1. User Authentication Flow
-The user fills out the login credentials on the frontend interface. JavaScript intercepts the action to form a secure asynchronous payload directed to the authentication route. The server logic checks the provided account roles, fetches the database records to compare credentials safely, issues a secure JSON Web Token (JWT) on success, and passes it forward to the frontend storage layers.
-
+### Flow 1: User Authentication (Login)
 ```mermaid
 sequenceDiagram
     autonumber
+    title Flow 1: User Authentication (Login)
+
     actor User as User / Owner
     participant FE as Frontend (UI / JS)
     participant BE as Backend API (Server)
@@ -32,3 +30,103 @@ sequenceDiagram
         BE-->>FE: HTTP 401 Unauthorized (Error Message)
         FE->>User: Display "Invalid Credentials" Alert
     end
+
+sequenceDiagram
+    autonumber
+    title Flow 2: Place Management (Property Listing)
+
+    actor Owner as Property Owner
+    participant FE as Frontend (UI / JS)
+    participant BE as Backend API (Server)
+    participant DB as Database
+
+    Owner->>FE: Input Property Details, Rooms & Amenities -> Click "List Place"
+    FE->>BE: POST /api/places (placeDetails, roomDetails, amenitiesList)
+    
+    BE->>BE: Validate Place Structure & Fields
+    BE->>DB: SELECT id FROM cities WHERE id = cityId
+    DB-->>BE: City Exists (True)
+    
+    BE->>DB: INSERT INTO places (ownerId, cityId, title, price) VALUES (...)
+    DB-->>BE: Confirm Success & Return placeId
+    
+    BE->>DB: INSERT INTO rooms (placeId, type, capacity) VALUES (...)
+    DB-->>BE: Confirm Rooms Saved
+    
+    BE->>DB: INSERT INTO place_amenities (placeId, amenityId) VALUES (...)
+    DB-->>BE: Confirm Amenities Linked
+    
+    BE-->>FE: HTTP 201 Created (Place Listed Successfully)
+    FE->>Owner: Render Success Alert & Update Listing View
+
+
+
+sequenceDiagram
+    autonumber
+    title Flow 3: End-to-End Booking Lifecycle
+
+    actor Guest as Guest User
+    participant FE as Frontend App
+    participant BE as Backend API (Server)
+    participant DB as Database
+    actor Owner as Property Owner
+
+    %% Phase 1: Guest Request
+    Guest->>FE: Select Dates & Click "Book Now"
+    FE->>BE: POST /api/bookings (placeId, startDate, endDate)
+    BE->>BE: Validate Date Constraints
+    
+    BE->>DB: SELECT * FROM bookings WHERE placeId = id AND overlapping dates
+    DB-->>BE: Availability Status (isBooked = False)
+    
+    BE->>DB: SELECT special_price FROM pricing WHERE placeId = id
+    DB-->>BE: Return Seasonal Price Details
+    
+    BE->>BE: Calculate Total Cost (basePrice, specialPrice, duration)
+    
+    BE->>DB: INSERT INTO bookings (guestId, status) VALUES (id, 'Pending')
+    DB-->>BE: Return bookingId & status='Pending'
+    
+    BE-->>FE: HTTP 201 Created (Booking Pending Approval)
+    FE->>Guest: Display: "Booking Placed! Waiting for Owner Approval"
+
+    %% Phase 2: Owner Action
+    Owner->>FE: Open Dashboard & Click "Approve Booking"
+    FE->>BE: PUT /api/bookings/{id}/status (status='Confirmed')
+    BE->>BE: Process Booking Decision Rules
+    
+    BE->>DB: UPDATE bookings SET status = 'Confirmed' WHERE id = bookingId
+    DB-->>BE: Status Updated Successfully
+    
+    BE->>DB: INSERT INTO booking_history (bookingId, transition) VALUES (id, 'Pending->Confirmed')
+    DB-->>BE: History Logged
+    
+    BE->>DB: INSERT INTO notifications (userId, message) VALUES (guestId, 'Your booking is confirmed!')
+    DB-->>BE: Notification Staged
+    
+    BE-->>FE: HTTP 200 OK (Booking Confirmed Successfully)
+    FE->>Owner: Refresh View & Display "Status Updated"
+
+
+sequenceDiagram
+    autonumber
+    title Flow 4: Review and Rating System
+
+    actor Guest as Guest User
+    participant FE as Frontend (UI / JS)
+    participant BE as Backend API (Server)
+    participant DB as Database
+
+    Guest->>FE: Fill Review Form, Select Stars & Click "Submit Review"
+    FE->>BE: POST /api/reviews (placeId, reviewText, ratingsDict)
+    
+    BE->>BE: Process Payload & Validate Session Authorization
+    
+    BE->>DB: INSERT INTO reviews (userId, placeId, text) VALUES (...)
+    DB-->>BE: Confirm Success & Return reviewId
+    
+    BE->>DB: INSERT INTO review_ratings (reviewId, category, score) VALUES (...)
+    DB-->>BE: Ratings Data Saved
+    
+    BE-->>FE: HTTP 201 Created (Review Submitted Successfully)
+    FE->>Guest: Display: "Thank you for your feedback!"
