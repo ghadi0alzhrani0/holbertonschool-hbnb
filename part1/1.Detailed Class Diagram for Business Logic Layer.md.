@@ -174,3 +174,4 @@ classDiagram
     User "1" --> "0..*" GuestReview : evaluated
     User "1" --> "0..*" SystemNotification : user_notified
     Owner "1" --> "0..*" SystemNotification : owner_notified
+```
