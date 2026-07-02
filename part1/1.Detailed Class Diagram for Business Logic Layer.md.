@@ -1,4 +1,4 @@
-```mermaid
+%%{init: {'theme': 'neutral'}}%%
 classDiagram
     class User {
         +String id
@@ -149,29 +149,29 @@ classDiagram
         +sendNotification() Boolean
         +markAsRead() Boolean
     }
-    Country "1" *-- "0..*" State : contains
-    State "1" *-- "0..*" City : contains
-    City "1" --> "0..*" Place : hosts
-    Owner "1" --> "0..*" Place : owns_and_manages
-    PlaceType "1" --> "0..*" Place : categorizes
-    CancellationPolicy "1" --> "0..*" Place : governs
-    Place "1" *-- "0..*" RoomDetail : composed_of
-    Place "1" *-- "0..*" PlaceAvailability : manages_schedule
-    Place "1" *-- "0..*" SeasonalPricing : applies
-    AmenityCategory "1" *-- "0..*" Amenity : groups
-    Place "0..*" --> "0..*" Amenity : features
-    User "1" --> "0..*" Booking : rents
-    Place "1" --> "0..*" Booking : booked_for
-    Booking "1" *-- "1" BookingGuest : includes
-    Booking "1" *-- "0..*" BookingHistory : logs
-    Place "1" --> "0..*" Review : receives
-    User "1" --> "0..*" Review : writes
-    Review "1" *-- "1" ReviewRatingDetails : details
-    Review "1" <-- "0..1" ReviewResponse : answered_by
-    Owner "1" --> "0..*" ReviewResponse : responds
-    Booking "1" --> "0..1" GuestReview : triggers
-    Owner "1" --> "0..*" GuestReview : conducts
-    User "1" --> "0..*" GuestReview : evaluated
-    User "1" --> "0..*" SystemNotification : user_notified
-    Owner "1" --> "0..*" SystemNotification : owner_notified
-```
+
+    Country "1" *-- "0..*" State : "contains"
+    State "1" *-- "0..*" City : "contains"
+    City "1" --> "0..*" Place : "hosts"
+    Owner "1" --> "0..*" Place : "owns_and_manages"
+    PlaceType "1" --> "0..*" Place : "categorizes"
+    CancellationPolicy "1" --> "0..*" Place : "governs"
+    Place "1" *-- "0..*" RoomDetail : "composed_of"
+    Place "1" *-- "0..*" PlaceAvailability : "manages_schedule"
+    Place "1" *-- "0..*" SeasonalPricing : "applies"
+    AmenityCategory "1" *-- "0..*" Amenity : "groups"
+    Place "0..*" --> "0..*" Amenity : "features"
+    User "1" --> "0..*" Booking : "rents"
+    Place "1" --> "0..*" Booking : "booked_for"
+    Booking "1" *-- "1" BookingGuest : "includes"
+    Booking "1" *-- "0..*" BookingHistory : "logs"
+    Place "1" --> "0..*" Review : "receives"
+    User "1" --> "0..*" Review : "writes"
+    Review "1" *-- "1" ReviewRatingDetails : "details"
+    ReviewResponse "0..1" --> "1" Review : "answered_by"
+    Owner "1" --> "0..*" ReviewResponse : "responds"
+    Booking "1" --> "0..1" GuestReview : "triggers"
+    Owner "1" --> "0..*" GuestReview : "conducts"
+    User "1" --> "0..*" GuestReview : "evaluated"
+    User "1" --> "0..*" SystemNotification : "user_notified"
+    Owner "1" --> "0..*" SystemNotification : "owner_notified"
