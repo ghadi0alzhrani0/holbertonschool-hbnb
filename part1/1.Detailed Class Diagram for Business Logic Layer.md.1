@@ -1,0 +1,176 @@
+```mermaid
+classDiagram
+    class User {
+        +String id
+        +String first_name
+        +String last_name
+        +String email
+        +String password
+        +register() Boolean
+        +login() Boolean
+        +bookPlace() Booking
+        +addReview() Review
+    }
+    class Owner {
+        +String id
+        +String business_name
+        +String contact_person
+        +String email
+        +String phone_number
+        +String commercial_register
+        +registerOwner() Boolean
+        +addPlace() Place
+        +addSeasonalPricing() SeasonalPricing
+        +respondToReview() ReviewResponse
+        +reviewGuest() GuestReview
+    }
+    class Country {
+        +String id
+        +String name
+        +String code
+    }
+    class State {
+        +String id
+        +String name
+    }
+    class City {
+        +String id
+        +String name
+    }
+    class PlaceType {
+        +String id
+        +String name
+    }
+    class CancellationPolicy {
+        +String id
+        +String name
+        +String description
+        +calculateRefund(total_price, days_before) Float
+    }
+    class Place {
+        +String id
+        +String name
+        +String description
+        +Integer number_rooms
+        +Integer number_bathrooms
+        +Integer max_guest
+        +Float price_by_night
+        +Float latitude
+        +Float longitude
+        +checkAvailability(start_date, end_date) Boolean
+        +calculateTotalPrice(start_date, end_date) Float
+        +getAverageRatings() ReviewRatingDetails
+    }
+    class RoomDetail {
+        +String id
+        +String room_name
+        +String bed_type
+        +Integer beds_count
+    }
+    class PlaceAvailability {
+        +String id
+        +DateTime start_date
+        +DateTime end_date
+        +Boolean is_booked
+        +toggleAvailability() Boolean
+    }
+    class SeasonalPricing {
+        +String id
+        +DateTime start_date
+        +DateTime end_date
+        +Float special_price
+        +isActive(date) Boolean
+    }
+    class AmenityCategory {
+        +String id
+        +String name
+    }
+    class Amenity {
+        +String id
+        +String name
+        +String description
+    }
+    class Booking {
+        +String id
+        +DateTime start_date
+        +DateTime end_date
+        +Float total_price
+        +String status
+        +confirm() Boolean
+        +cancel() Boolean
+        +checkIn() Boolean
+    }
+    class BookingGuest {
+        +String id
+        +Integer adults_count
+        +Integer children_count
+        +Integer infants_count
+        +getTotalGuestsCount() Integer
+    }
+    class BookingHistory {
+        +String id
+        +String old_status
+        +String new_status
+        +DateTime changed_at
+        +logStatusChange() Boolean
+    }
+    class Review {
+        +String id
+        +String review_text
+        +DateTime created_at
+    }
+    class ReviewRatingDetails {
+        +String id
+        +Integer cleanliness
+        +Integer accuracy
+        +Integer communication
+        +Integer location
+        +Integer check_in
+        +Integer value
+        +calculateAverageRating() Float
+    }
+    class ReviewResponse {
+        +String id
+        +String response_text
+        +DateTime created_at
+    }
+    class GuestReview {
+        +String id
+        +Integer cleanliness_rating
+        +Integer communication_rating
+        +Integer respect_rules_rating
+        +String review_text
+    }
+    class SystemNotification {
+        +String id
+        +String notification_type
+        +String content
+        +Boolean is_seen
+        +sendNotification() Boolean
+        +markAsRead() Boolean
+    }
+    Country "1" *-- "0..*" State : contains
+    State "1" *-- "0..*" City : contains
+    City "1" --> "0..*" Place : hosts
+    Owner "1" --> "0..*" Place : owns_and_manages
+    PlaceType "1" --> "0..*" Place : categorizes
+    CancellationPolicy "1" --> "0..*" Place : governs
+    Place "1" *-- "0..*" RoomDetail : composed_of
+    Place "1" *-- "0..*" PlaceAvailability : manages_schedule
+    Place "1" *-- "0..*" SeasonalPricing : applies
+    AmenityCategory "1" *-- "0..*" Amenity : groups
+    Place "0..*" --> "0..*" Amenity : features
+    User "1" --> "0..*" Booking : rents
+    Place "1" --> "0..*" Booking : booked_for
+    Booking "1" *-- "1" BookingGuest : includes
+    Booking "1" *-- "0..*" BookingHistory : logs
+    Place "1" --> "0..*" Review : receives
+    User "1" --> "0..*" Review : writes
+    Review "1" *-- "1" ReviewRatingDetails : details
+    Review "1" <-- "0..1" ReviewResponse : answered_by
+    Owner "1" --> "0..*" ReviewResponse : responds
+    Booking "1" --> "0..1" GuestReview : triggers
+    Owner "1" --> "0..*" GuestReview : conducts
+    User "1" --> "0..*" GuestReview : evaluated
+    User "1" --> "0..*" SystemNotification : user_notified
+    Owner "1" --> "0..*" SystemNotification : owner_notified
