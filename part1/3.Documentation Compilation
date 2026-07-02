@@ -1,1 +1,164 @@
+# HBnB Technical Documentation
 
+## Introduction
+
+### Purpose
+
+This document explains the design of the HBnB project before implementation. It combines the system architecture, business logic, and API interaction diagrams into one document. The goal is to provide a clear reference that helps developers understand how the application is organized and how its components work together.
+
+### Scope
+
+This document includes:
+
+- High-Level Package Diagram
+- Business Logic Class Diagram
+- API Sequence Diagrams
+- A brief explanation for each diagram
+
+---
+
+# 1. High-Level Architecture
+
+> **Insert High-Level Package Diagram here**
+
+## Purpose
+
+The High-Level Package Diagram shows the overall structure of the HBnB application. It explains how the different layers communicate while keeping each layer responsible for its own task.
+
+## Main Components
+
+- **Presentation Layer:** Handles user interaction through the interface.
+- **Business Logic Layer:** Processes application rules and manages system operations.
+- **Persistence Layer:** Handles saving and retrieving data.
+- **Database:** Stores all application information permanently.
+
+## Design Decisions
+
+The project uses a layered architecture to separate responsibilities and make the system easier to understand and maintain. A Facade pattern is used in the Business Logic layer to provide a single entry point for handling requests before accessing the database.
+
+---
+
+# 2. Business Logic Layer
+
+> **Insert Class Diagram here**
+
+## Purpose
+
+The Class Diagram describes the main classes of the system and how they are connected. It represents the core business logic of the application.
+
+## Main Classes
+
+### User
+
+Represents users of the system. A user can own places and write reviews.
+
+### Place
+
+Represents a property available in the system. Each place belongs to one user and can receive reviews.
+
+### Review
+
+Represents feedback written by users for a place.
+
+### Amenity
+
+Represents services or features available in a place, such as Wi-Fi or Parking.
+
+## Relationships
+
+- One User can own multiple Places.
+- One User can write multiple Reviews.
+- One Place can have multiple Reviews.
+- One Place can include multiple Amenities.
+
+## Design Decisions
+
+Each class has its own responsibility, making the business logic organized and easy to extend. Relationships between classes are used to represent how the application's data is connected.
+
+---
+
+# 3. API Interaction Flow
+
+> **Insert Sequence Diagrams here**
+
+---
+
+## Flow 1 – User Authentication
+
+### Purpose
+
+This sequence shows how users log into the system.
+
+### Components
+
+- User
+- Frontend
+- Backend API
+- Database
+
+### Explanation
+
+The user enters login information in the frontend. The backend receives the request and checks the credentials in the database. If the information is correct, the backend returns a successful login response. Otherwise, an error message is returned.
+
+---
+
+## Flow 2 – Create Place
+
+### Purpose
+
+This sequence explains how a new place is added.
+
+### Components
+
+- User
+- Frontend
+- Backend API
+- Database
+
+### Explanation
+
+The user fills in the place information and submits it. The backend validates the data and stores the new place in the database. After saving, a success response is returned.
+
+---
+
+## Flow 3 – Submit Review
+
+### Purpose
+
+This sequence explains how users submit reviews.
+
+### Components
+
+- User
+- Frontend
+- Backend API
+- Database
+
+### Explanation
+
+The user writes a review and sends it through the frontend. The backend validates the request and saves the review in the database before returning a confirmation message.
+
+---
+
+## Flow 4 – Search Places
+
+### Purpose
+
+This sequence explains how users search for available places.
+
+### Components
+
+- User
+- Frontend
+- Backend API
+- Database
+
+### Explanation
+
+The user enters search criteria. The frontend sends the request to the backend, which retrieves matching places from the database and returns the results to the user.
+
+---
+
+# Conclusion
+
+This document combines the main diagrams of the HBnB project into one technical reference. It explains the system architecture, the business logic, and the API interactions. Together, these diagrams provide a clear blueprint that will guide the implementation of the project.
