@@ -1,1 +1,34 @@
+# 2. Sequence Diagrams for API Calls
 
+## 1. User Authentication Flow
+The user fills out the login credentials on the frontend interface. JavaScript intercepts the action to form a secure asynchronous payload directed to the authentication route. The server logic checks the provided account roles, fetches the database records to compare credentials safely, issues a secure JSON Web Token (JWT) on success, and passes it forward to the frontend storage layers.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as User / Owner
+    participant FE as Frontend (UI / JS)
+    participant BE as Backend API (Server)
+    participant DB as Database
+
+    User->>FE: Fill Login Form & Click "Submit"
+    FE->>BE: POST /api/auth/login (email, password, role)
+    
+    alt If Role is Owner
+        BE->>DB: SELECT * FROM owners WHERE email = input_email
+        DB-->>BE: Return Owner Record (hashed_password)
+    else If Role is Guest
+        BE->>DB: SELECT * FROM users WHERE email = input_email
+        DB-->>BE: Return Guest Record (hashed_password)
+    end
+
+    BE->>BE: Verify Password (inputPassword, storedPassword)
+    
+    alt Credentials Valid
+        BE->>BE: Generate JWT Token (actorId, roleType)
+        BE-->>FE: HTTP 200 OK (Token & Redirect URL)
+        FE->>User: Display Dashboard & Store Token
+    else Credentials Invalid
+        BE-->>FE: HTTP 401 Unauthorized (Error Message)
+        FE->>User: Display "Invalid Credentials" Alert
+    end
