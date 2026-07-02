@@ -1,3 +1,4 @@
+```mermaid
 %%{init: {'theme': 'neutral'}}%%
 classDiagram
     class User {
