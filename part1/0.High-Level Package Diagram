@@ -1,1 +1,191 @@
-
+erDiagram
+    USER {
+        string id PK
+        string first_name
+        string last_name
+        string email
+        string password
+        datetime created_at
+        datetime updated_at
+    }
+    OWNER {
+        string id PK
+        string business_name
+        string contact_person
+        string email
+        string password
+        string phone_number
+        string commercial_register
+        datetime created_at
+        datetime updated_at
+    }
+    COUNTRY {
+        string id PK
+        string name
+        string code
+    }
+    STATE {
+        string id PK
+        string country_id FK
+        string name
+    }
+    CITY {
+        string id PK
+        string state_id FK
+        string name
+    }
+    PLACE_TYPE {
+        string id PK
+        string name
+    }
+    CANCELLATION_POLICY {
+        string id PK
+        string name
+        string description
+    }
+    PLACE {
+        string id PK
+        string owner_id FK
+        string city_id FK
+        string place_type_id FK
+        string cancellation_policy_id FK
+        string name
+        string description
+        integer number_rooms
+        integer number_bathrooms
+        integer max_guest
+        float price_by_night
+        float latitude
+        float longitude
+        datetime created_at
+        datetime updated_at
+    }
+    ROOM_DETAIL {
+        string id PK
+        string place_id FK
+        string room_name
+        string bed_type
+        integer beds_count
+    }
+    PLACE_AVAILABILITY {
+        string id PK
+        string place_id FK
+        datetime start_date
+        datetime end_date
+        boolean is_booked
+    }
+    SEASONAL_PRICING {
+        string id PK
+        string place_id FK
+        datetime start_date
+        datetime end_date
+        float special_price
+    }
+    AMENITY_CATEGORY {
+        string id PK
+        string name
+    }
+    AMENITY {
+        string id PK
+        string category_id FK
+        string name
+        string description
+    }
+    PLACE_AMENITY {
+        string place_id FK
+        string amenity_id FK
+    }
+    BOOKING {
+        string id PK
+        string place_id FK
+        string user_id FK
+        datetime start_date
+        datetime end_date
+        float total_price
+        string status
+        datetime created_at
+        datetime updated_at
+    }
+    BOOKING_GUEST {
+        string id PK
+        string booking_id FK
+        integer adults_count
+        integer children_count
+        integer infants_count
+    }
+    BOOKING_HISTORY {
+        string id PK
+        string booking_id FK
+        string old_status
+        string new_status
+        datetime changed_at
+    }
+    REVIEW {
+        string id PK
+        string place_id FK
+        string user_id FK
+        string review_text
+        datetime created_at
+    }
+    REVIEW_RATING_DETAILS {
+        string id PK
+        string review_id FK
+        integer cleanliness
+        integer accuracy
+        integer communication
+        integer location
+        integer check_in
+        integer value
+    }
+    REVIEW_RESPONSE {
+        string id PK
+        string review_id FK
+        string owner_id FK
+        string response_text
+        datetime created_at
+    }
+    GUEST_REVIEW {
+        string id PK
+        string booking_id FK
+        string owner_id FK
+        string guest_id FK
+        integer cleanliness_rating
+        integer communication_rating
+        integer respect_rules_rating
+        string review_text
+    }
+    SYSTEM_NOTIFICATION {
+        string id PK
+        string user_id FK
+        string owner_id FK
+        string notification_type
+        string content
+        boolean is_seen
+        datetime created_at
+    }
+    COUNTRY ||--o{ STATE : "has"
+    STATE ||--o{ CITY : "has"
+    CITY ||--o{ PLACE : "hosts"
+    OWNER ||--o{ PLACE : "owns_and_manages"
+    PLACE_TYPE ||--o{ PLACE : "categorizes"
+    CANCELLATION_POLICY ||--o{ PLACE : "governs"
+    PLACE ||--o{ ROOM_DETAIL : "contains"
+    PLACE ||--o{ PLACE_AVAILABILITY : "scheduled_at"
+    PLACE ||--o{ SEASONAL_PRICING : "priced_at"
+    AMENITY_CATEGORY ||--o{ AMENITY : "groups"
+    PLACE ||--o{ PLACE_AMENITY : "features"
+    AMENITY ||--o{ PLACE_AMENITY : "provides"
+    PLACE ||--o{ BOOKING : "booked_for"
+    USER ||--o{ BOOKING : "rents_user_id"
+    BOOKING ||--|| BOOKING_GUEST : "includes"
+    BOOKING ||--o{ BOOKING_HISTORY : "logs"
+    PLACE ||--o{ REVIEW : "receives"
+    USER ||--o{ REVIEW : "writes_user_id"
+    REVIEW ||--|| REVIEW_RATING_DETAILS : "rated_by"
+    REVIEW ||--|| REVIEW_RESPONSE : "answered_by_owner"
+    OWNER ||--o{ REVIEW_RESPONSE : "writes_response"
+    BOOKING ||--|| GUEST_REVIEW : "evaluates"
+    OWNER ||--o{ GUEST_REVIEW : "conducts_review"
+    USER ||--o{ GUEST_REVIEW : "receives_rating"
+    USER ||--o{ SYSTEM_NOTIFICATION : "user_notified"
+    OWNER ||--o{ SYSTEM_NOTIFICATION : "owner_notified"
