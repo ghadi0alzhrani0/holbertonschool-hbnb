@@ -461,7 +461,7 @@ class HBnBFacade:
         if status not in transitions:
             raise ValueError("Unsupported booking status transition")
         history = transitions[status]()
-        self.booking_repo.add(booking)
+        self.booking_history_repo.add(history)
         return history
 
     def create_review_rating_details(self, rating_data):
