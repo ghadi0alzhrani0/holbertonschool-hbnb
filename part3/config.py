@@ -9,7 +9,7 @@ class Config:
 
     SECRET_KEY = os.getenv(
         "SECRET_KEY",
-        "default-secret-key"
+        "development-secret-key-change-me-123456"
     )
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", SECRET_KEY)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
