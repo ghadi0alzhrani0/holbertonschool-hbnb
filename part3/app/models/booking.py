@@ -77,16 +77,21 @@ class Booking(BaseModel):
     ):
         """Initialize a booking."""
         super().__init__()
-        self.place = place
-        self.user = user
-        self.start_date = _as_date(start_date, "Start date")
-        self.end_date = _as_date(end_date, "End date")
-        if self.end_date <= self.start_date:
+        parsed_start_date = _as_date(start_date, "Start date")
+        parsed_end_date = _as_date(end_date, "End date")
+        if parsed_end_date <= parsed_start_date:
             raise ValueError("End date must be after start date")
-        self.total_price = (
-            place.calculate_total_price(self.start_date, self.end_date)
+
+        calculated_price = (
+            place.calculate_total_price(parsed_start_date, parsed_end_date)
             if total_price is None else total_price
         )
+
+        self.place = place
+        self.user = user
+        self.start_date = parsed_start_date
+        self.end_date = parsed_end_date
+        self.total_price = calculated_price
         self.status = status
 
     @validates("total_price")
