@@ -11,6 +11,8 @@ class Config:
         "SECRET_KEY",
         "default-secret-key"
     )
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", SECRET_KEY)
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG = False
 
 
@@ -18,11 +20,23 @@ class DevelopmentConfig(Config):
     """Define development configuration."""
 
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = "sqlite:///development.db"
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        "DEV_DATABASE_URL",
+        "sqlite:///development.db"
+    )
+
+
+class ProductionConfig(Config):
+    """Define production configuration for MySQL."""
+
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        "DATABASE_URL",
+        "mysql+pymysql://hbnb:hbnb@localhost/hbnb"
+    )
 
 
 config = {
     "development": DevelopmentConfig,
+    "production": ProductionConfig,
     "default": DevelopmentConfig
 }
