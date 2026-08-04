@@ -2,8 +2,9 @@
 
 ## Automated Tests
 
-The automated tests are in `tests/test_api.py`. They use a separate
-in-memory SQLite database so development data is not changed.
+The automated tests are in `tests/test_api.py`,
+`tests/test_extended_api.py`, and `tests/test_extended_models.py`. They use
+a separate in-memory SQLite database so development data is not changed.
 
 Run the suite from the `part3` directory:
 
@@ -30,10 +31,10 @@ The suite covers:
 - Extended Part 1 location, ownership, place detail, and booking entities.
 - Detailed ratings, owner responses, guest reviews, and notifications.
 
-The complete suite contains 19 tests. A successful run ends with:
+The complete suite contains 22 tests. A successful run ends with:
 
 ```text
-Ran 19 tests
+Ran 22 tests
 OK
 ```
 
