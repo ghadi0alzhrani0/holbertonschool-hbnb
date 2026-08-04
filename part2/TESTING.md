@@ -37,6 +37,8 @@ Automated tests are located in:
 
 ```text
 tests/test_api.py
+tests/test_extended_api.py
+tests/test_extended_models.py
 ```
 
 Run them from the `part2` directory:
@@ -48,7 +50,7 @@ python3 -m unittest discover -s tests
 Latest local result:
 
 ```text
-Ran 20 tests
+Ran 22 tests
 OK
 ```
 
@@ -215,7 +217,7 @@ Expected status: `200 OK`
 ## Summary
 
 The API includes model-level validation, Swagger documentation, and
-automated endpoint tests. The 20 automated tests cover successful
+automated endpoint tests. The 22 automated tests cover successful
 requests, invalid input, boundary values, missing resources, entity
 relationships, review deletion, Swagger documentation, and the extended
 Part 1 business entities. The manual cURL cases above provide black-box
