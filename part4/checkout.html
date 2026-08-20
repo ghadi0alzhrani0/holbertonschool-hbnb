@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Review and confirm an HBnB booking.">
+  <title>Checkout - HBnB</title>
+  <link rel="icon" href="images/icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Playfair+Display:wght@500;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/global.css?v=20260820">
+  <link rel="stylesheet" href="css/portal.css?v=20260820">
+</head>
+<body>
+  <header class="site-header"><nav class="nav-shell container" aria-label="Primary navigation"><a class="brand" href="index.html" aria-label="HBnB home"><img class="logo" src="images/logo.png" alt="HBnB logo"><span class="brand-name">HBNB</span></a><div class="nav-links"><a class="nav-link" data-nav="user_home.html" href="user_home.html">My home</a><a class="nav-link" data-nav="explore.html" href="explore.html">Explore</a><a class="nav-link" data-nav="bookings.html" href="bookings.html">Bookings</a></div><div class="nav-actions"><a id="login-link" class="nav-action login-button" href="login.html">Sign in</a><a id="nav-profile" class="nav-action primary" href="profile.html" style="display:none">Profile</a></div></nav></header>
+  <main class="container page">
+    <section class="portal-hero"><div><div class="eyebrow">Secure checkout</div><h1 class="page-title">Review your<br><em>reservation.</em></h1><p class="page-subtitle">Confirm dates and guest counts before the booking is created.</p></div></section>
+    <div id="checkout-loading" class="empty-state">Loading booking details...</div>
+    <section id="checkout-view" class="checkout-layout section hidden">
+      <form id="checkout-form" class="form">
+        <section><div class="eyebrow">Stay details</div><h2 class="section-title">Dates and guests</h2><div class="form-grid"><div class="field"><label for="checkout-start">Check in</label><input id="checkout-start" type="date" required></div><div class="field"><label for="checkout-end">Check out</label><input id="checkout-end" type="date" required></div></div><div class="form-grid"><div class="field"><label for="checkout-adults">Adults</label><input id="checkout-adults" type="number" min="1" required></div><div class="field"><label for="checkout-children">Children</label><input id="checkout-children" type="number" min="0"></div></div><div class="field"><label for="checkout-infants">Infants</label><input id="checkout-infants" type="number" min="0"></div></section>
+        <section class="section"><div class="eyebrow">Policy</div><h2 id="checkout-policy-name" class="section-title">Cancellation policy</h2><p id="checkout-policy-text" class="page-subtitle"></p></section>
+        <div id="checkout-error" class="error-box"></div>
+        <div class="form-footer"><a id="checkout-back" class="btn" href="explore.html">Back to place</a><button id="checkout-submit" class="btn primary" type="submit">Confirm booking</button></div>
+      </form>
+      <aside class="checkout-summary">
+        <img id="checkout-image" class="checkout-image" src="images/logo.png" alt="Selected HBnB place">
+        <div class="section-head"><div><div class="eyebrow">Booking summary</div><h2 id="checkout-title" class="section-title">Stay</h2></div></div>
+        <div class="checkout-lines"><div class="checkout-line"><span>Nightly rate</span><strong id="checkout-rate">-</strong></div><div class="checkout-line"><span>Nights</span><strong id="checkout-nights">0</strong></div><div class="checkout-line"><span>Guests</span><strong id="checkout-guests">0</strong></div><div class="checkout-line total"><span>Estimated total</span><strong id="checkout-total">-</strong></div></div>
+      </aside>
+    </section>
+  </main>
+  <footer class="site-footer container">© 2026 HBnB. All rights reserved.</footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="js/common.js?v=20260820c" defer></script>
+  <script src="js/checkout.js" defer></script>
+</body>
+</html>

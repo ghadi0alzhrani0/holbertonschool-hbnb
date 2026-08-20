@@ -1,0 +1,121 @@
+.review-shell {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.review-page-title {
+  font-size: 4.5rem;
+}
+
+.review-place-name {
+  margin: 5px 0;
+  color: var(--brown);
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 2rem;
+}
+
+.review-heading {
+  color: var(--brown);
+}
+
+.review-actions {
+  justify-content: flex-end;
+}
+
+.review-card {
+  margin: 20px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: rgba(255, 253, 249, .78);
+  box-shadow: var(--shadow-deep);
+}
+
+.review-place {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 18px;
+  align-items: center;
+}
+
+.review-place img {
+  width: 240px;
+  height: 160px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.stars {
+  display: flex;
+  gap: 6px;
+}
+
+.star {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #c9c1b8;
+  font-size: 2.2rem;
+}
+
+.star.active,
+.star:hover {
+  transform: translateY(-2px);
+  color: var(--red);
+}
+
+.rating-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.rating-item {
+  padding: 17px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .55);
+}
+
+.rating-stars {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.rating-stars button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #c9c1b8;
+  font-size: 1.2rem;
+}
+
+.rating-stars button.active {
+  color: var(--yellow);
+}
+
+.counter {
+  color: var(--muted);
+  font-size: .77rem;
+  text-align: right;
+}
+
+@media (max-width: 700px) {
+  .review-page-title {
+    font-size: 3rem;
+  }
+
+  .review-place {
+    grid-template-columns: 1fr;
+  }
+
+  .review-place img {
+    width: 100%;
+    height: 220px;
+  }
+
+  .rating-grid {
+    grid-template-columns: 1fr;
+  }
+}

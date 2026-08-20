@@ -1,0 +1,399 @@
+const API_BASE = localStorage.getItem("HBnB_API_BASE")
+  || "http://127.0.0.1:5001/api/v1";
+
+const IMAGE_POOL = [
+  "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1400&q=84",
+  "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1400&q=84",
+  "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1400&q=84",
+  "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=84",
+  "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1400&q=84",
+  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=84"
+];
+
+function getCookie(name) {
+  const cookie = document.cookie
+    .split("; ")
+    .find((item) => item.startsWith(`${name}=`));
+  return cookie ? decodeURIComponent(cookie.split("=").slice(1).join("=")) : null;
+}
+
+function setCookie(name, value, maxAge = 604800) {
+  const secure = location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `${name}=${encodeURIComponent(value)}; Max-Age=${maxAge}; Path=/; SameSite=Lax${secure}`;
+}
+
+function removeCookie(name) {
+  document.cookie = `${name}=; Max-Age=0; Path=/; SameSite=Lax`;
+}
+
+function isAuthenticated() {
+  return Boolean(getCookie("token"));
+}
+
+function tokenPayload() {
+  const token = getCookie("token");
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const value = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const padded = value.padEnd(Math.ceil(value.length / 4) * 4, "=");
+    return JSON.parse(atob(padded));
+  } catch (error) {
+    return null;
+  }
+}
+
+function sessionRole() {
+  return tokenPayload()?.role || "guest";
+}
+
+function isOwnerAccount() {
+  return sessionRole() === "owner";
+}
+
+function isAdminAccount() {
+  return sessionRole() === "admin";
+}
+
+function isManagementAccount() {
+  return isOwnerAccount() || isAdminAccount();
+}
+
+function authHeaders() {
+  const token = getCookie("token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+async function api(path, options = {}) {
+  const headers = {
+    ...authHeaders(),
+    ...(options.headers || {})
+  };
+
+  if (options.body && !headers["Content-Type"]) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  const response = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers
+  });
+  const responseText = await response.text();
+  let data = null;
+
+  try {
+    data = responseText ? JSON.parse(responseText) : null;
+  } catch (error) {
+    data = responseText;
+  }
+
+  if (!response.ok) {
+    const message = data?.error || data?.message || data?.msg
+      || `Request failed (${response.status})`;
+    const error = new Error(message);
+    error.status = response.status;
+    error.data = data;
+    throw error;
+  }
+
+  return data;
+}
+
+function safe(value = "") {
+  return String(value).replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#039;"
+  }[character]));
+}
+
+function qs(key) {
+  return new URLSearchParams(location.search).get(key);
+}
+
+function money(value) {
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) {
+    return "SAR -";
+  }
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "SAR",
+    maximumFractionDigits: 0
+  }).format(amount);
+}
+
+function dateFmt(value) {
+  if (!value) {
+    return "-";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  }).format(date);
+}
+
+function dateInputValue(date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function imageFor(object = {}, index = 0) {
+  return object.image_url
+    || object.image
+    || object.cover_image
+    || IMAGE_POOL[index % IMAGE_POOL.length];
+}
+
+document.addEventListener("error", (event) => {
+  const image = event.target;
+  if (!(image instanceof HTMLImageElement)
+      || image.classList.contains("logo")
+      || image.dataset.fallbackApplied) {
+    return;
+  }
+
+  image.dataset.fallbackApplied = "true";
+  image.src = IMAGE_POOL[0];
+}, true);
+
+function toast(message) {
+  const element = document.getElementById("toast");
+  if (!element) {
+    return;
+  }
+  element.textContent = message;
+  element.classList.add("show");
+  clearTimeout(window.toastTimer);
+  window.toastTimer = setTimeout(() => element.classList.remove("show"), 3600);
+}
+
+function logout() {
+  removeCookie("token");
+  location.href = "index.html";
+}
+
+function authOrLogin(next) {
+  if (isAuthenticated()) {
+    return true;
+  }
+  const target = encodeURIComponent(next || location.href);
+  location.href = `login.html?next=${target}`;
+  return false;
+}
+
+let notificationTimer = null;
+let previousUnreadCount = null;
+
+function notificationSymbol(type = "") {
+  if (type.includes("booking") || type.includes("trip")) {
+    return "B";
+  }
+  if (type.includes("review")) {
+    return "R";
+  }
+  return "N";
+}
+
+function renderNotificationPreview(items) {
+  const list = document.getElementById("notification-preview-list");
+  if (!list) {
+    return;
+  }
+
+  const sorted = [...items].sort((left, right) => (
+    new Date(right.created_at) - new Date(left.created_at)
+  ));
+  list.innerHTML = sorted.length
+    ? sorted.slice(0, 20).map((item) => `
+      <button class="notification-preview-item ${item.is_seen ? "" : "unread"}"
+        type="button" data-notification-id="${safe(item.id)}">
+        <span class="notification-preview-symbol" aria-hidden="true">
+          ${notificationSymbol(item.notification_type)}
+        </span>
+        <span>
+          <strong>${safe(item.notification_type.replaceAll("_", " "))}</strong>
+          <small>${safe(item.content)}</small>
+        </span>
+      </button>
+    `).join("")
+    : '<div class="notification-preview-empty">No notifications yet.</div>';
+
+  list.querySelectorAll("[data-notification-id]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      try {
+        await api(
+          `/notifications/${encodeURIComponent(button.dataset.notificationId)}/read`,
+          { method: "PUT" }
+        );
+        await refreshNotificationCenter(true);
+      } catch (error) {
+        toast(error.message);
+      }
+    });
+  });
+}
+
+async function refreshNotificationCenter(initial = false) {
+  const badge = document.getElementById("notification-badge");
+  if (!badge || !isAuthenticated()) {
+    return;
+  }
+
+  try {
+    const items = await fetchAll("/notifications/");
+    const unread = items.filter((item) => !item.is_seen);
+    badge.textContent = unread.length > 9 ? "9+" : String(unread.length);
+    badge.classList.toggle("hidden", unread.length === 0);
+    renderNotificationPreview(items);
+
+    if (
+      !initial
+      && previousUnreadCount !== null
+      && unread.length > previousUnreadCount
+    ) {
+      toast(unread[0]?.content || "You have a new notification.");
+    }
+    previousUnreadCount = unread.length;
+  } catch (error) {
+    if (error.status === 401) {
+      clearInterval(notificationTimer);
+    }
+  }
+}
+
+function initNotificationCenter() {
+  if (!isAuthenticated()) {
+    return;
+  }
+
+  const navActions = document.querySelector(".nav-actions");
+  if (!navActions || document.getElementById("notification-center")) {
+    return;
+  }
+
+  const center = document.createElement("div");
+  center.id = "notification-center";
+  center.className = "notification-center";
+  center.innerHTML = `
+    <button id="notification-bell" class="notification-bell" type="button"
+      aria-label="Notifications" aria-expanded="false">
+      <svg class="notification-bell-icon" aria-hidden="true"
+        viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.27 21a2 2 0 0 0 3.46 0"></path>
+        <path d="M3.26 15.33A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.67C19.41 13.96 18 12.5 18 8A6 6 0 0 0 6 8c0 4.5-1.41 5.96-2.74 7.33"></path>
+      </svg>
+      <span id="notification-badge" class="notification-badge hidden">0</span>
+    </button>
+    <section id="notification-popover" class="notification-popover hidden"
+      aria-label="Recent notifications">
+      <div class="notification-popover-head">
+        <strong>Notifications</strong>
+        <span>Updates automatically</span>
+      </div>
+      <div id="notification-preview-list"></div>
+    </section>
+  `;
+  navActions.insertBefore(center, document.getElementById("nav-profile"));
+
+  const bell = document.getElementById("notification-bell");
+  const popover = document.getElementById("notification-popover");
+  bell.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const opening = popover.classList.contains("hidden");
+    popover.classList.toggle("hidden", !opening);
+    bell.setAttribute("aria-expanded", String(opening));
+    if (opening) {
+      refreshNotificationCenter(true);
+    }
+  });
+  popover.addEventListener("click", (event) => event.stopPropagation());
+  document.addEventListener("click", () => {
+    popover.classList.add("hidden");
+    bell.setAttribute("aria-expanded", "false");
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      popover.classList.add("hidden");
+      bell.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  refreshNotificationCenter(true);
+  notificationTimer = setInterval(refreshNotificationCenter, 8000);
+  window.addEventListener("focus", () => refreshNotificationCenter(true));
+  window.addEventListener("pagehide", () => clearInterval(notificationTimer));
+}
+
+function initNav() {
+  const currentPage = location.pathname.split("/").pop() || "index.html";
+  const loginLink = document.getElementById("login-link");
+  const profileLink = document.getElementById("nav-profile");
+  const role = sessionRole();
+  const navLinks = document.querySelector(".nav-links");
+
+  document.querySelectorAll('[data-nav="notifications.html"]')
+    .forEach((link) => link.remove());
+
+  if (navLinks && isAuthenticated()) {
+    const links = role === "owner" || role === "admin"
+      ? [
+        ["owner_home.html", role === "admin" ? "Admin home" : "Owner home"],
+        ["manage_places.html", "Properties"],
+        ["owner_bookings.html", "Reservations"]
+      ]
+      : [
+        ["user_home.html", "My home"],
+        ["explore.html", "Explore"],
+        ["bookings.html", "Bookings"]
+      ];
+    navLinks.innerHTML = links.map(([href, label]) => `
+      <a class="nav-link" data-nav="${href}" href="${href}">${label}</a>
+    `).join("");
+  }
+
+  document.querySelectorAll("[data-nav]").forEach((link) => {
+    link.classList.toggle("active", link.dataset.nav === currentPage);
+  });
+
+  if (loginLink) {
+    loginLink.style.display = isAuthenticated() ? "none" : "inline-flex";
+  }
+  if (profileLink) {
+    profileLink.style.display = isAuthenticated() ? "inline-flex" : "none";
+    profileLink.href = "profile.html";
+    profileLink.textContent = "Profile";
+  }
+
+  document.getElementById("logout-btn")?.addEventListener("click", logout);
+  initNotificationCenter();
+}
+
+async function fetchPlaces() {
+  const data = await api("/places/");
+  return Array.isArray(data) ? data : (data?.items || data?.places || []);
+}
+
+async function fetchPlace(id) {
+  return api(`/places/${encodeURIComponent(id)}`);
+}
+
+async function fetchUser(id) {
+  return api(`/users/${encodeURIComponent(id)}`);
+}
+
+async function fetchAll(path) {
+  const data = await api(path);
+  return Array.isArray(data) ? data : (data?.items || data?.data || []);
+}
+
+document.addEventListener("DOMContentLoaded", initNav);

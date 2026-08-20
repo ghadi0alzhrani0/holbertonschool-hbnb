@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Your personal HBnB home.">
+  <title>My home - HBnB</title>
+  <link rel="icon" href="images/icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Playfair+Display:wght@500;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/global.css?v=20260820">
+  <link rel="stylesheet" href="css/portal.css?v=20260820">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav-shell container" aria-label="Primary navigation">
+      <a class="brand" href="index.html" aria-label="HBnB home">
+        <img class="logo" src="images/logo.png" alt="HBnB logo">
+        <span class="brand-name">HBNB</span>
+      </a>
+      <div class="nav-links">
+        <a class="nav-link" data-nav="user_home.html" href="user_home.html">My home</a>
+        <a class="nav-link" data-nav="explore.html" href="explore.html">Explore</a>
+        <a class="nav-link" data-nav="bookings.html" href="bookings.html">Bookings</a>
+      </div>
+      <div class="nav-actions">
+        <a id="login-link" class="nav-action login-button" href="login.html">Sign in</a>
+        <a id="nav-profile" class="nav-action primary" href="profile.html" style="display:none">Profile</a>
+      </div>
+    </nav>
+  </header>
+  <main class="container page">
+    <section class="portal-hero">
+      <div>
+        <div class="eyebrow">Guest home</div>
+        <h1 class="page-title">Welcome back,<br><em id="guest-name">traveler.</em></h1>
+        <p class="page-subtitle">Your active stays, booking progress, and recommendations in one place.</p>
+      </div>
+      <div class="portal-actions">
+        <a class="btn primary" href="explore.html">Find a stay</a>
+        <a class="btn" href="bookings.html">View all bookings</a>
+      </div>
+    </section>
+    <section class="metric-grid" aria-label="Account summary">
+      <div class="metric"><span class="muted small">Total bookings</span><strong id="guest-booking-count">0</strong></div>
+      <div class="metric"><span class="muted small">Upcoming stays</span><strong id="guest-upcoming-count">0</strong></div>
+      <div class="metric"><span class="muted small">Completed trips</span><strong id="guest-completed-count">0</strong></div>
+      <div class="metric"><span class="muted small">Unread updates</span><strong id="guest-notification-count">0</strong></div>
+    </section>
+    <section class="section dashboard-grid">
+      <div>
+        <div class="section-head"><div><div class="eyebrow">Current trip</div><h2 class="section-title">Your next stay</h2></div></div>
+        <div id="active-booking" class="compact-list"></div>
+      </div>
+      <aside class="dashboard-side">
+        <div class="eyebrow">Quick access</div>
+        <div class="list">
+          <a class="list-item" href="explore.html"><strong>Explore destinations</strong><span>Open</span></a>
+          <a class="list-item" href="bookings.html"><strong>Booking history</strong><span>Open</span></a>
+          <a class="list-item" href="profile.html"><strong>Account settings</strong><span>Open</span></a>
+        </div>
+      </aside>
+    </section>
+    <section class="section">
+      <div class="section-head"><div><div class="eyebrow">Recommended</div><h2 class="section-title">Places for your next trip</h2></div><a class="btn" href="explore.html">See all</a></div>
+      <div id="guest-recommendations" class="grid grid-3"></div>
+    </section>
+  </main>
+  <footer class="site-footer container">© 2026 HBnB. All rights reserved.</footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="js/common.js?v=20260820c" defer></script>
+  <script src="js/user_home.js" defer></script>
+</body>
+</html>

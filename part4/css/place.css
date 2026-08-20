@@ -1,0 +1,222 @@
+.place-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 580px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ccc;
+  box-shadow: var(--shadow-deep);
+}
+
+.place-hero img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.place-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(93, 48, 14, .04), rgba(93, 48, 14, .78));
+}
+
+.place-hero-content {
+  position: absolute;
+  z-index: 2;
+  right: 34px;
+  bottom: 34px;
+  left: 34px;
+  color: #fff;
+}
+
+.place-hero-title {
+  margin: 7px 0;
+  color: #fff;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 5rem;
+  line-height: .95;
+  letter-spacing: 0;
+}
+
+.place-location {
+  color: #ffe8df;
+}
+
+.place-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.38fr) minmax(330px, .62fr);
+  gap: 20px;
+}
+
+.sticky-card {
+  position: sticky;
+  top: 110px;
+}
+
+.booking-box {
+  padding: 24px;
+}
+
+.price-big {
+  color: var(--brown);
+  font-size: 2rem;
+  font-weight: 900;
+}
+
+.gallery {
+  display: grid;
+  grid-template-rows: 220px 220px;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 10px;
+}
+
+.gallery img {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.gallery .main {
+  grid-row: span 2;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.feature {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .55);
+}
+
+.review-card {
+  margin: 20px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .55);
+}
+
+.review-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.review-rating {
+  color: var(--red);
+}
+
+.place-info {
+  color: var(--muted);
+  line-height: 1.75;
+}
+
+.place-details {
+  margin-top: 24px;
+}
+
+.place-host {
+  color: var(--brown);
+  font-weight: 700;
+}
+
+.place-facts {
+  margin-top: 18px;
+}
+
+.cancellation-policy {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.cancellation-policy h3 {
+  margin: 6px 0;
+  color: var(--brown);
+}
+
+.availability-pill {
+  display: inline-flex;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #eef8ef;
+  color: var(--green);
+  font-size: .75rem;
+}
+
+.availability-pill.unavailable {
+  background: #fff0f2;
+  color: #a32034;
+}
+
+.booking-price-row,
+.booking-total-row,
+.availability-row {
+  justify-content: space-between;
+}
+
+.booking-spacer {
+  height: 16px;
+}
+
+.booking-total-box {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff8ed;
+}
+
+.price-breakdown,
+.room-note,
+.rate-note {
+  margin-top: 8px;
+}
+
+@media (max-width: 980px) {
+  .place-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sticky-card {
+    position: static;
+  }
+
+  .gallery {
+    grid-template-rows: 260px 180px 180px;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .gallery .main {
+    grid-row: auto;
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 620px) {
+  .place-hero-title {
+    font-size: 3rem;
+  }
+
+  .gallery {
+    grid-template-rows: 240px 160px 160px 160px;
+    grid-template-columns: 1fr;
+  }
+
+  .gallery .main {
+    grid-column: auto;
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
