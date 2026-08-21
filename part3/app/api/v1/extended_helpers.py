@@ -123,7 +123,15 @@ def serialize_booking(booking):
     data = _base(booking)
     data.update({
         "place_id": booking.place.id,
+        "place_title": booking.place.title,
+        "business_owner_id": (
+            booking.place.business_owner.id
+            if booking.place.business_owner else None
+        ),
         "user_id": booking.user.id,
+        "guest_name": (
+            f"{booking.user.first_name} {booking.user.last_name}"
+        ),
         "start_date": _iso(booking.start_date),
         "end_date": _iso(booking.end_date),
         "total_price": booking.total_price,

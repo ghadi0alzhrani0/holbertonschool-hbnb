@@ -138,11 +138,25 @@ def serialize_place_summary(place):
     return {
         "id": place.id,
         "title": place.title,
+        "description": place.description,
         "price": place.price,
         "latitude": place.latitude,
         "longitude": place.longitude,
         "city_id": place.city.id if place.city else None,
-        "place_type_id": place.place_type.id if place.place_type else None
+        "place_type_id": place.place_type.id if place.place_type else None,
+        "cancellation_policy_id": (
+            place.cancellation_policy.id
+            if place.cancellation_policy else None
+        ),
+        "business_owner_id": (
+            place.business_owner.id if place.business_owner else None
+        ),
+        "number_rooms": place.number_rooms,
+        "number_bathrooms": place.number_bathrooms,
+        "max_guest": place.max_guest,
+        "amenities": [
+            serialize_amenity(amenity) for amenity in place.amenities
+        ]
     }
 
 
@@ -199,8 +213,24 @@ class PlaceList(Resource):
     @api.response(400, "Invalid input data")
     def post(self):
         """Register a new place."""
+        claims = get_jwt()
         data = (api.payload or {}).copy()
-        data["owner_id"] = get_jwt_identity()
+        identity = get_jwt_identity()
+
+        if claims.get("is_owner", False):
+            administrators = [
+                user for user in facade.get_all_users() if user.is_admin
+            ]
+            if not administrators:
+                return {
+                    "error": "An administrator account is required"
+                }, 503
+            data["owner_id"] = administrators[0].id
+            data["business_owner_id"] = identity
+        else:
+            data["owner_id"] = identity
+            if not claims.get("is_admin", False):
+                data.pop("business_owner_id", None)
 
         try:
             place = facade.create_place(data)
@@ -241,8 +271,18 @@ class PlaceResource(Resource):
         place = facade.get_place(place_id)
         if not place:
             return {"error": "Place not found"}, 404
-        is_admin = get_jwt().get("is_admin", False)
-        if not is_admin and place.owner.id != get_jwt_identity():
+        claims = get_jwt()
+        identity = get_jwt_identity()
+        is_business_owner = (
+            claims.get("is_owner", False)
+            and place.business_owner is not None
+            and place.business_owner.id == identity
+        )
+        if (
+            not claims.get("is_admin", False)
+            and not is_business_owner
+            and place.owner.id != identity
+        ):
             return {"error": "Unauthorized action"}, 403
 
         try:
@@ -262,8 +302,18 @@ class PlaceResource(Resource):
         if not place:
             return {"error": "Place not found"}, 404
 
-        is_admin = get_jwt().get("is_admin", False)
-        if not is_admin and place.owner.id != get_jwt_identity():
+        claims = get_jwt()
+        identity = get_jwt_identity()
+        is_business_owner = (
+            claims.get("is_owner", False)
+            and place.business_owner is not None
+            and place.business_owner.id == identity
+        )
+        if (
+            not claims.get("is_admin", False)
+            and not is_business_owner
+            and place.owner.id != identity
+        ):
             return {"error": "Unauthorized action"}, 403
 
         facade.delete_place(place_id)

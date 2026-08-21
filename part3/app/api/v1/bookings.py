@@ -30,7 +30,7 @@ booking_model = bookings_api.model("Booking", {
 booking_status_model = bookings_api.model("BookingStatus", {
     "status": fields.String(
         required=True,
-        enum=["confirmed", "cancelled", "checked_in"]
+        enum=["confirmed", "cancelled", "checked_in", "completed"]
     )
 })
 guest_model = guests_api.model("BookingGuest", {
@@ -48,10 +48,58 @@ guest_update_model = guests_api.model("BookingGuestUpdate", {
 
 def _can_access_booking(booking):
     """Return whether the JWT owner can access a booking."""
+    claims = get_jwt()
+    is_property_owner = (
+        claims.get("is_owner", False)
+        and booking.place.business_owner is not None
+        and booking.place.business_owner.id == get_jwt_identity()
+    )
     return (
-        get_jwt().get("is_admin", False)
+        claims.get("is_admin", False)
+        or is_property_owner
         or booking.user.id == get_jwt_identity()
     )
+
+
+def _create_booking_notifications(booking):
+    """Create guest and property-owner notifications for a booking."""
+    facade.create_notification({
+        "notification_type": "booking_created",
+        "content": (
+            f"Your reservation at {booking.place.title} was created."
+        ),
+        "user_id": booking.user.id
+    })
+    if booking.place.business_owner is not None:
+        facade.create_notification({
+            "notification_type": "new_booking",
+            "content": (
+                f"New reservation from {booking.user.first_name} "
+                f"for {booking.place.title}."
+            ),
+            "owner_id": booking.place.business_owner.id
+        })
+
+
+def _create_status_notifications(booking):
+    """Notify both sides after a booking status changes."""
+    facade.create_notification({
+        "notification_type": "booking_status",
+        "content": (
+            f"Your reservation at {booking.place.title} is now "
+            f"{booking.status}."
+        ),
+        "user_id": booking.user.id
+    })
+    if booking.place.business_owner is not None:
+        facade.create_notification({
+            "notification_type": "booking_status",
+            "content": (
+                f"Reservation for {booking.place.title} is now "
+                f"{booking.status}."
+            ),
+            "owner_id": booking.place.business_owner.id
+        })
 
 
 def _booking_access_error(booking_id):
@@ -72,19 +120,30 @@ class BookingList(Resource):
     @jwt_required()
     def post(self):
         """Create a booking."""
+        if get_jwt().get("is_owner", False):
+            return {"error": "Owner accounts cannot create bookings"}, 403
         data = (bookings_api.payload or {}).copy()
         data["user_id"] = get_jwt_identity()
         try:
             booking = facade.create_booking(data)
         except (KeyError, ValueError) as exc:
             return {"error": str(exc)}, 400
+        _create_booking_notifications(booking)
         return serialize_booking(booking), 201
 
     @jwt_required()
     def get(self):
         """Retrieve all bookings."""
         bookings = facade.get_all_extended_resources("bookings")
-        if not get_jwt().get("is_admin", False):
+        claims = get_jwt()
+        if claims.get("is_owner", False):
+            owner_id = get_jwt_identity()
+            bookings = [
+                booking for booking in bookings
+                if booking.place.business_owner is not None
+                and booking.place.business_owner.id == owner_id
+            ]
+        elif not claims.get("is_admin", False):
             user_id = get_jwt_identity()
             bookings = [
                 booking for booking in bookings
@@ -113,12 +172,21 @@ class BookingResource(Resource):
         error = _booking_access_error(booking_id)
         if error:
             return error
+        new_status = (bookings_api.payload or {}).get("status")
+        claims = get_jwt()
+        if (
+            not claims.get("is_admin", False)
+            and not claims.get("is_owner", False)
+            and new_status != "cancelled"
+        ):
+            return {"error": "Guests can only cancel bookings"}, 403
         try:
             history = facade.update_booking_status(
-                booking_id, (bookings_api.payload or {}).get("status")
+                booking_id, new_status
             )
         except ValueError as exc:
             return {"error": str(exc)}, 400
+        _create_status_notifications(history.booking)
         return serialize_booking(history.booking), 200
 
 
@@ -130,6 +198,8 @@ class BookingGuestList(Resource):
     @jwt_required()
     def post(self):
         """Add guest counts to a booking."""
+        if get_jwt().get("is_owner", False):
+            return {"error": "Owner accounts cannot add booking guests"}, 403
         error = _booking_access_error(
             (guests_api.payload or {}).get("booking_id")
         )
@@ -145,7 +215,15 @@ class BookingGuestList(Resource):
     def get(self):
         """Retrieve all booking guest records."""
         details = facade.get_all_extended_resources("booking_guests")
-        if not get_jwt().get("is_admin", False):
+        claims = get_jwt()
+        if claims.get("is_owner", False):
+            owner_id = get_jwt_identity()
+            details = [
+                item for item in details
+                if item.booking.place.business_owner is not None
+                and item.booking.place.business_owner.id == owner_id
+            ]
+        elif not claims.get("is_admin", False):
             user_id = get_jwt_identity()
             details = [
                 item for item in details
@@ -198,7 +276,15 @@ class BookingHistoryList(Resource):
     def get(self):
         """Retrieve all booking status changes."""
         history = facade.get_all_extended_resources("booking_history")
-        if not get_jwt().get("is_admin", False):
+        claims = get_jwt()
+        if claims.get("is_owner", False):
+            owner_id = get_jwt_identity()
+            history = [
+                item for item in history
+                if item.booking.place.business_owner is not None
+                and item.booking.place.business_owner.id == owner_id
+            ]
+        elif not claims.get("is_admin", False):
             user_id = get_jwt_identity()
             history = [
                 item for item in history

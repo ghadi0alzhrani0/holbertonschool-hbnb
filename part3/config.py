@@ -13,6 +13,14 @@ class Config:
     )
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", SECRET_KEY)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    PROPAGATE_EXCEPTIONS = True
+    CORS_ORIGINS = os.getenv(
+        "CORS_ORIGINS",
+        (
+            "http://127.0.0.1:8000,http://localhost:8000,"
+            "http://127.0.0.1:5500,http://localhost:5500"
+        )
+    ).split(",")
     DEBUG = False
 
 

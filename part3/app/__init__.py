@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """Initialize the HBnB Flask application."""
 
-from flask import Flask
+from flask import Flask, request
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
 from flask_restx import Api
@@ -47,6 +47,21 @@ def create_app(config_class="config.DevelopmentConfig"):
     bcrypt.init_app(app)
     jwt.init_app(app)
     db.init_app(app)
+
+    @app.after_request
+    def add_cors_headers(response):
+        """Allow the local Part 4 client to call the API."""
+        origin = request.headers.get("Origin")
+        if origin in app.config.get("CORS_ORIGINS", []):
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Vary"] = "Origin"
+            response.headers["Access-Control-Allow-Headers"] = (
+                "Content-Type, Authorization"
+            )
+            response.headers["Access-Control-Allow-Methods"] = (
+                "GET, POST, PUT, DELETE, OPTIONS"
+            )
+        return response
 
     api = Api(
         app,

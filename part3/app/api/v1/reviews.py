@@ -52,6 +52,8 @@ class ReviewList(Resource):
     @api.response(400, "Invalid input data")
     def post(self):
         """Register a new review."""
+        if get_jwt().get("is_owner", False):
+            return {"error": "Owner accounts cannot review places"}, 403
         data = (api.payload or {}).copy()
         user_id = get_jwt_identity()
         place = facade.get_place(data.get("place_id"))
@@ -69,6 +71,16 @@ class ReviewList(Resource):
             review = facade.create_review(data)
         except ValueError as exc:
             return {"error": str(exc)}, 400
+
+        if place.business_owner is not None:
+            facade.create_notification({
+                "notification_type": "new_review",
+                "content": (
+                    f"A new {review.rating}-star review was added to "
+                    f"{place.title}."
+                ),
+                "owner_id": place.business_owner.id
+            })
 
         return serialize_review(review), 201
 

@@ -2,9 +2,9 @@
 """Define business owner API endpoints."""
 
 from flask_restx import Namespace, Resource, fields
-from flask_jwt_extended import get_jwt, jwt_required
+from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 
-from app.api.v1.extended_helpers import serialize_owner
+from app.api.v1.extended_helpers import serialize_booking, serialize_owner
 from app.services import facade
 
 
@@ -36,6 +36,29 @@ def _admin_error():
     return None
 
 
+def _owner_error():
+    """Return an authorization response for a non-owner account."""
+    if not get_jwt().get("is_owner", False):
+        return {"error": "Owner account required"}, 403
+    return None
+
+
+def _serialize_owner_place(place):
+    """Return the place fields needed by the owner dashboard."""
+    return {
+        "id": place.id,
+        "title": place.title,
+        "description": place.description,
+        "price": place.price,
+        "city_id": place.city.id if place.city else None,
+        "number_rooms": place.number_rooms,
+        "number_bathrooms": place.number_bathrooms,
+        "max_guest": place.max_guest,
+        "booking_count": len(place.bookings),
+        "review_count": len(place.reviews)
+    }
+
+
 @api.route("/")
 class OwnerList(Resource):
     """Handle the business owner collection."""
@@ -61,6 +84,82 @@ class OwnerList(Resource):
             return error
         owners = facade.get_all_extended_resources("owners")
         return [serialize_owner(owner) for owner in owners], 200
+
+
+@api.route("/me")
+class CurrentOwnerResource(Resource):
+    """Handle the signed-in business owner profile."""
+
+    @jwt_required()
+    def get(self):
+        """Retrieve the current owner profile."""
+        error = _owner_error()
+        if error:
+            return error
+        owner = facade.get_extended_resource(
+            "owners", get_jwt_identity()
+        )
+        if owner is None:
+            return {"error": "Owner not found"}, 404
+        return serialize_owner(owner), 200
+
+    @jwt_required()
+    def put(self):
+        """Update the current owner's public business details."""
+        error = _owner_error()
+        if error:
+            return error
+        allowed = {"business_name", "contact_person", "phone_number"}
+        data = api.payload or {}
+        unknown = set(data) - allowed
+        if unknown:
+            return {"error": "Unsupported owner field"}, 400
+        try:
+            owner = facade.update_extended_resource(
+                "owners", get_jwt_identity(), data
+            )
+        except ValueError as exc:
+            return {"error": str(exc)}, 400
+        return serialize_owner(owner), 200
+
+
+@api.route("/me/places")
+class CurrentOwnerPlaces(Resource):
+    """List places managed by the signed-in business owner."""
+
+    @jwt_required()
+    def get(self):
+        """Retrieve the current owner's properties."""
+        error = _owner_error()
+        if error:
+            return error
+        owner_id = get_jwt_identity()
+        places = [
+            place for place in facade.get_all_places()
+            if place.business_owner is not None
+            and place.business_owner.id == owner_id
+        ]
+        return [_serialize_owner_place(place) for place in places], 200
+
+
+@api.route("/me/bookings")
+class CurrentOwnerBookings(Resource):
+    """List reservations for the signed-in owner's properties."""
+
+    @jwt_required()
+    def get(self):
+        """Retrieve bookings received by the current owner."""
+        error = _owner_error()
+        if error:
+            return error
+        owner_id = get_jwt_identity()
+        bookings = [
+            booking
+            for booking in facade.get_all_extended_resources("bookings")
+            if booking.place.business_owner is not None
+            and booking.place.business_owner.id == owner_id
+        ]
+        return [serialize_booking(booking) for booking in bookings], 200
 
 
 @api.route("/<owner_id>")

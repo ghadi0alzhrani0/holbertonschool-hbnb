@@ -73,6 +73,70 @@ class TestExtendedAPI(unittest.TestCase):
         self.assertEqual(response.status_code, 201, response.get_json())
         return response.get_json()
 
+    def test_owner_login_dashboard_and_notifications(self):
+        """An owner sees property bookings and receives live-feed records."""
+        owner = facade.create_owner({
+            "business_name": "Najd Stay",
+            "contact_person": "Noura",
+            "email": "owner@example.com",
+            "password": "ownerpass",
+            "phone_number": "0500000000",
+            "commercial_register": "CR-OWNER"
+        })
+        host = facade.get_user_by_email("host@example.com")
+        place = facade.create_place({
+            "title": "Owner Hotel",
+            "description": "A managed property",
+            "price": 200,
+            "latitude": 24.7,
+            "longitude": 46.7,
+            "owner_id": host.id,
+            "business_owner_id": owner.id
+        })
+        owner_headers = self.login("owner@example.com", "ownerpass")
+
+        profile = self.client.get(
+            "/api/v1/owners/me", headers=owner_headers
+        )
+        self.assertEqual(profile.status_code, 200)
+        self.assertEqual(profile.get_json()["business_name"], "Najd Stay")
+
+        booking = self.post("/api/v1/bookings/", {
+            "place_id": place.id,
+            "start_date": "2026-10-02",
+            "end_date": "2026-10-04"
+        }, self.guest_headers)
+
+        bookings = self.client.get(
+            "/api/v1/owners/me/bookings", headers=owner_headers
+        )
+        self.assertEqual(bookings.status_code, 200)
+        self.assertEqual(bookings.get_json()[0]["id"], booking["id"])
+
+        notifications = self.client.get(
+            "/api/v1/notifications/", headers=owner_headers
+        )
+        self.assertEqual(notifications.status_code, 200)
+        self.assertEqual(
+            notifications.get_json()[0]["notification_type"],
+            "new_booking"
+        )
+
+        guest_confirmation = self.client.put(
+            f"/api/v1/bookings/{booking['id']}",
+            json={"status": "confirmed"},
+            headers=self.guest_headers
+        )
+        self.assertEqual(guest_confirmation.status_code, 403)
+
+        confirmed = self.client.put(
+            f"/api/v1/bookings/{booking['id']}",
+            json={"status": "confirmed"},
+            headers=owner_headers
+        )
+        self.assertEqual(confirmed.status_code, 200)
+        self.assertEqual(confirmed.get_json()["status"], "confirmed")
+
     def test_extended_entities_persist_with_authorization(self):
         """Create and connect all extended entities through protected APIs."""
         owner = self.post("/api/v1/owners/", {
@@ -189,7 +253,7 @@ class TestExtendedAPI(unittest.TestCase):
         response = self.client.put(
             f"/api/v1/bookings/{booking['id']}",
             json={"status": "confirmed"},
-            headers=self.guest_headers
+            headers=self.admin_headers
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get_json()["status"], "confirmed")
