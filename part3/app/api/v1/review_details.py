@@ -54,8 +54,8 @@ response_update_model = responses_api.model("ReviewResponseUpdate", {
 })
 guest_review_model = guest_reviews_api.model("GuestReview", {
     "booking_id": fields.String(required=True),
-    "owner_id": fields.String(required=True),
-    "guest_id": fields.String(required=True),
+    "owner_id": fields.String(),
+    "guest_id": fields.String(),
     "cleanliness_rating": fields.Integer(required=True, min=1, max=5),
     "communication_rating": fields.Integer(required=True, min=1, max=5),
     "respect_rules_rating": fields.Integer(required=True, min=1, max=5),
@@ -170,13 +170,32 @@ class ResponseList(Resource):
     @jwt_required()
     def post(self):
         """Create an owner response."""
-        error = _admin_error()
-        if error:
-            return error
+        data = (responses_api.payload or {}).copy()
+        claims = get_jwt()
+        if claims.get("is_owner", False):
+            review = facade.get_review(data.get("review_id"))
+            if review is None:
+                return {"error": "Review not found"}, 404
+            if (
+                review.place.business_owner is None
+                or review.place.business_owner.id != get_jwt_identity()
+            ):
+                return {"error": "Unauthorized action"}, 403
+            data["owner_id"] = get_jwt_identity()
+        elif not claims.get("is_admin", False):
+            return {"error": "Owner account required"}, 403
         try:
-            obj = facade.create_review_response(responses_api.payload or {})
+            obj = facade.create_review_response(data)
         except ValueError as exc:
             return {"error": str(exc)}, 400
+        facade.create_notification({
+            "notification_type": "review_response",
+            "content": (
+                f"The host replied to your review of "
+                f"{obj.review.place.title}."
+            ),
+            "user_id": obj.review.user.id
+        })
         return serialize_review_response(obj), 201
 
     def get(self):
@@ -200,9 +219,20 @@ class ResponseResource(Resource):
     @jwt_required()
     def put(self, object_id):
         """Update an owner response."""
-        error = _admin_error()
-        if error:
-            return error
+        response = facade.get_extended_resource(
+            "review_responses", object_id
+        )
+        if response is None:
+            return {"error": "Review response not found"}, 404
+        claims = get_jwt()
+        if (
+            not claims.get("is_admin", False)
+            and not (
+                claims.get("is_owner", False)
+                and response.owner.id == get_jwt_identity()
+            )
+        ):
+            return {"error": "Unauthorized action"}, 403
         return _update(
             "review_responses", object_id, responses_api.payload or {},
             "Review response", serialize_review_response
@@ -217,11 +247,34 @@ class GuestReviewList(Resource):
     @jwt_required()
     def post(self):
         """Create a review of a guest."""
-        error = _admin_error()
-        if error:
-            return error
+        data = (guest_reviews_api.payload or {}).copy()
+        booking = facade.get_extended_resource(
+            "bookings", data.get("booking_id")
+        )
+        if booking is None:
+            return {"error": "Booking not found"}, 404
+
+        claims = get_jwt()
+        if claims.get("is_owner", False):
+            if (
+                booking.place.business_owner is None
+                or booking.place.business_owner.id != get_jwt_identity()
+            ):
+                return {"error": "Unauthorized action"}, 403
+            data["owner_id"] = get_jwt_identity()
+        elif not claims.get("is_admin", False):
+            return {"error": "Owner account required"}, 403
+
+        if (
+            not claims.get("is_admin", False)
+            and booking.status != "completed"
+        ):
+            return {
+                "error": "Guest reviews require a completed booking"
+            }, 400
+        data["guest_id"] = booking.user.id
         try:
-            obj = facade.create_guest_review(guest_reviews_api.payload or {})
+            obj = facade.create_guest_review(data)
         except ValueError as exc:
             return {"error": str(exc)}, 400
         return serialize_guest_review(obj), 201
@@ -247,9 +300,18 @@ class GuestReviewResource(Resource):
     @jwt_required()
     def put(self, object_id):
         """Update a guest review."""
-        error = _admin_error()
-        if error:
-            return error
+        review = facade.get_extended_resource("guest_reviews", object_id)
+        if review is None:
+            return {"error": "Guest review not found"}, 404
+        claims = get_jwt()
+        if (
+            not claims.get("is_admin", False)
+            and not (
+                claims.get("is_owner", False)
+                and review.owner.id == get_jwt_identity()
+            )
+        ):
+            return {"error": "Unauthorized action"}, 403
         return _update(
             "guest_reviews", object_id, guest_reviews_api.payload or {},
             "Guest review", serialize_guest_review

@@ -131,6 +131,15 @@ class HBnBFacade:
 
         return self.user_repo.get_user_by_email(email.strip())
 
+    def get_owner_by_email(self, email):
+        """Retrieve a business owner by email."""
+        if not email:
+            return None
+
+        return self.owner_repo.get_by_attribute(
+            "email", email.strip().lower()
+        )
+
     def get_all_users(self):
         """Retrieve every user."""
         return self.user_repo.get_all()
@@ -547,7 +556,8 @@ class HBnBFacade:
         transitions = {
             "confirmed": booking.confirm,
             "cancelled": booking.cancel,
-            "checked_in": booking.check_in
+            "checked_in": booking.check_in,
+            "completed": booking.complete
         }
         if status not in transitions:
             raise ValueError("Unsupported booking status transition")

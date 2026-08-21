@@ -17,10 +17,16 @@ class BaseModel(db.Model):
         primary_key=True,
         default=lambda: str(uuid.uuid4())
     )
-    created_at = db.Column(db.DateTime, default=datetime.now, nullable=False)
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.now,
+        server_default=db.func.current_timestamp(),
+        nullable=False
+    )
     updated_at = db.Column(
         db.DateTime,
         default=datetime.now,
+        server_default=db.func.current_timestamp(),
         onupdate=datetime.now,
         nullable=False
     )

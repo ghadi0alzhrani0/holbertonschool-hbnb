@@ -93,9 +93,15 @@ def _place_access_error(place_id):
     place = facade.get_place(place_id)
     if place is None:
         return {"error": "Place not found"}, 404
-    if (
-        not get_jwt().get("is_admin", False)
-        and place.owner.id != get_jwt_identity()
+    claims = get_jwt()
+    identity = get_jwt_identity()
+    is_business_owner = (
+        claims.get("is_owner", False)
+        and place.business_owner is not None
+        and place.business_owner.id == identity
+    )
+    if not claims.get("is_admin", False) and not is_business_owner and (
+        place.owner.id != identity
     ):
         return {"error": "Unauthorized action"}, 403
     return None

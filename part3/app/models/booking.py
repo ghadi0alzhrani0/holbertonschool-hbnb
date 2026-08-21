@@ -119,10 +119,14 @@ class Booking(BaseModel):
 
     def confirm(self):
         """Confirm a pending booking."""
+        if self.status != "pending":
+            raise ValueError("Only pending bookings can be confirmed")
         return self._change_status("confirmed")
 
     def cancel(self):
         """Cancel the booking."""
+        if self.status in {"cancelled", "completed"}:
+            raise ValueError("This booking cannot be cancelled")
         return self._change_status("cancelled")
 
     def check_in(self):
@@ -130,6 +134,12 @@ class Booking(BaseModel):
         if self.status != "confirmed":
             raise ValueError("Only confirmed bookings can check in")
         return self._change_status("checked_in")
+
+    def complete(self):
+        """Mark a checked-in booking as completed."""
+        if self.status != "checked_in":
+            raise ValueError("Only checked-in bookings can be completed")
+        return self._change_status("completed")
 
 
 class BookingGuest(BaseModel):
