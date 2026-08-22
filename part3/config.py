@@ -14,6 +14,7 @@ class Config:
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", SECRET_KEY)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     PROPAGATE_EXCEPTIONS = True
+    AUTO_SETUP_DATABASE = False
     CORS_ORIGINS = os.getenv(
         "CORS_ORIGINS",
         (
@@ -28,6 +29,9 @@ class DevelopmentConfig(Config):
     """Define development configuration."""
 
     DEBUG = True
+    AUTO_SETUP_DATABASE = os.getenv(
+        "AUTO_SETUP_DATABASE", "true"
+    ).lower() in {"1", "true", "yes", "on"}
     SQLALCHEMY_DATABASE_URI = os.getenv(
         "DEV_DATABASE_URL",
         "sqlite:///development.db"

@@ -98,4 +98,9 @@ def create_app(config_class="config.DevelopmentConfig"):
     api.add_namespace(guest_reviews_api, path="/api/v1/guest-reviews")
     api.add_namespace(notifications_ns, path="/api/v1/notifications")
 
+    if app.config.get("AUTO_SETUP_DATABASE", False):
+        from app.database import initialize_database
+
+        initialize_database(app)
+
     return app

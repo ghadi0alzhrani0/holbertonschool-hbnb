@@ -45,31 +45,18 @@ python3 -m pip install -r requirements.txt
 
 ## Database Initialization
 
-Create the mapped tables:
+The development database is initialized automatically when the application
+starts. Missing tables are created and `sql_scripts/seed.sql` is loaded with
+the sample users, owner, places, bookings, reviews, and notifications. The
+seed uses fixed identifiers and `INSERT OR IGNORE`, so restarting the server
+does not duplicate data.
 
-```bash
-flask --app run.py shell
-```
-
-Then run:
-
-```python
-from app import db
-db.create_all()
-exit()
-```
-
-Load the initial administrator and amenities:
-
-```bash
-sqlite3 instance/development.db < sql_scripts/seed.sql
-```
-
-The initial administrator credentials are:
+The sample account credentials are:
 
 ```text
-Email: admin@hbnb.io
-Password: admin1234
+Guest: guest@hbnb.io / guest1234
+Owner: owner@hbnb.io / owner1234
+Admin: admin@hbnb.io / admin1234
 ```
 
 The password is stored as a bcrypt hash, not as plaintext.
@@ -83,8 +70,17 @@ python3 run.py
 Swagger documentation is available at:
 
 ```text
-http://127.0.0.1:5000/api/v1/
+http://127.0.0.1:5001/api/v1/
 ```
+
+Start the Part 4 client in a second terminal:
+
+```bash
+cd ../part4
+python3 -m http.server 5500
+```
+
+Open `http://127.0.0.1:5500/` in a browser.
 
 ## Authentication
 
