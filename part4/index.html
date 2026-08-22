@@ -1,11 +1,129 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Discover summer-inspired stays with HBnB."><title>Home — HBnB</title><link rel="icon" href="images/icon.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Playfair+Display:wght@500;600;700&amp;display=swap" rel="stylesheet"><link rel="stylesheet" href="css/global.css?v=20260820"><link rel="stylesheet" href="css/index.css"></head><body>
-<header class="site-header"><nav class="nav-shell container" aria-label="Primary navigation"><a class="brand" href="index.html" aria-label="HBnB home"><img class="logo" src="images/logo.png" alt="HBnB logo" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'"><span class="brand-mark" style="display:none">H</span><span class="brand-name">HBNB</span></a><div class="nav-links"><a class="nav-link" data-nav="index.html" href="index.html">Home</a><a class="nav-link" data-nav="explore.html" href="explore.html">Explore</a><a class="nav-link" data-nav="bookings.html" href="bookings.html">Bookings</a></div><div class="nav-actions"><a id="login-link" class="nav-action login-button" href="login.html">Sign in</a><a id="nav-profile" class="nav-action primary" href="profile.html" style="display:none">Profile</a></div></nav></header>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Discover summer-inspired stays with HBnB.">
+  <title>Home - HBnB</title>
+  <link rel="icon" href="images/icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Playfair+Display:wght@500;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/global.css?v=20260822c">
+  <link rel="stylesheet" href="css/index.css?v=20260822c">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav-shell container" aria-label="Primary navigation">
+      <a class="brand" href="index.html" aria-label="HBnB home">
+        <img class="logo" src="images/logo.png" alt="HBnB logo">
+        <span class="brand-name">HBNB</span>
+      </a>
+      <div class="nav-links">
+        <a class="nav-link" data-nav="index.html" href="index.html">Home</a>
+        <a class="nav-link" data-nav="explore.html" href="explore.html">Explore</a>
+        <a class="nav-link" data-nav="bookings.html" href="bookings.html">Bookings</a>
+      </div>
+      <div class="nav-actions">
+        <a id="login-link" class="nav-action login-button" href="login.html">Sign in</a>
+        <a id="nav-profile" class="nav-action primary" href="profile.html" style="display:none">Profile</a>
+      </div>
+    </nav>
+  </header>
 
-<main>
-<section class="home-hero"><div class="home-hero-bg"></div><div class="container home-content"><div class="eyebrow">HBnB · Summer collection</div><h1 class="home-title">Stay somewhere<br><span>sunny.</span></h1><p class="home-lead">A warm, polished booking experience for hotels, villas, apartments, and extraordinary escapes.</p><form id="home-search" class="search-orb"><div class="search-field"><span>Where</span><strong id="where-value">Anywhere</strong></div><div class="search-field"><span>Check in</span><strong>Choose a date</strong></div><div class="search-field"><span>Guests</span><strong>2 guests</strong></div><button class="btn primary" type="submit">Explore →</button></form></div></section>
-<section class="spotlight container"><div class="section-head"><div><div class="eyebrow">Live collection</div><h2 id="spotlight-title" class="section-title">Hotel spotlight</h2></div><div class="glass-row"><button id="spot-prev" class="btn" type="button">←</button><button id="spot-next" class="btn primary" type="button">→</button></div></div><div id="spotlight-stage" class="spotlight-stage"></div><div style="text-align:center"><span id="spot-count" class="muted small">01 / 01</span></div></section>
-<section class="container section" id="stays"><div class="section-head"><div><div class="eyebrow">Real places</div><h2 class="section-title">Featured stays</h2></div><a class="btn" href="explore.html">View all →</a></div><div class="hero-card"><div class="form-grid"><div class="field"><label for="price-filter">Maximum price per night</label><select id="price-filter"><option value="10">10</option><option value="50">50</option><option value="100">100</option><option value="all" selected>All</option></select></div><div class="field"><label for="home-city">Destination</label><input id="home-city" placeholder="Riyadh, AlUla, Jeddah…"></div></div></div><div id="places-list" class="grid grid-3" style="margin-top:18px"></div></section>
-<section class="container section" id="destinations"><div class="feature-strip"><article class="feature-tile"><div class="eyebrow">01 · Escape</div><h3>Coral mornings</h3><p class="muted">Soft light, warm textures, and stays made for slow days.</p></article><article class="feature-tile"><div class="eyebrow">02 · Comfort</div><h3>Hotel, your way</h3><p class="muted">Amenities, dates, guests, pricing, availability — visible before you book.</p></article><article class="feature-tile"><div class="eyebrow">03 · Trust</div><h3>Real feedback</h3><p class="muted">Reviews, detailed ratings, owner responses, and booking history.</p></article></div></section>
-<section class="container section" id="story"><div class="hero-card"><div class="grid grid-2 story-grid"><div><div class="eyebrow">HBnB story</div><h2 class="page-title story-title">A summer mood,<br><em>with real data.</em></h2></div><div class="list"><div class="list-item"><div><strong>Live API</strong><div class="muted small">Places, bookings, reviews, users, availability, seasonal pricing, notifications.</div></div><span class="badge brown">01</span></div><div class="list-item"><div><strong>Real booking flow</strong><div class="muted small">Check dates and guests, calculate the total, then create the booking.</div></div><span class="badge red">02</span></div><div class="list-item"><div><strong>Seasonal by design</strong><div class="muted small">Summer colors bring coral, mint, sunshine yellow, and warm brown together.</div></div><span class="badge green">03</span></div></div></div></div></section>
-</main>
-<footer class="site-footer container">© 2026 HBnB. All rights reserved.</footer><div id="toast" class="toast" role="status" aria-live="polite"></div><script src="js/common.js?v=20260820b" defer></script><script src="js/index.js" defer></script></body></html>
+  <main>
+    <section class="home-hero">
+      <div class="home-hero-bg"></div>
+      <div class="container home-content">
+        <div class="eyebrow">HBnB · Summer collection</div>
+        <h1 class="home-title">Stay somewhere<br><span>sunny.</span></h1>
+        <p class="home-lead">Find hotels, villas, apartments, and extraordinary escapes for your next stay.</p>
+        <form id="home-search" class="search-orb" aria-label="Search stays">
+          <label class="search-field" for="hero-destination">
+            <span>Where</span>
+            <select id="hero-destination" name="destination"><option value="all">Anywhere</option></select>
+          </label>
+          <label class="search-field" for="hero-check-in">
+            <span>Check in</span><input id="hero-check-in" name="check_in" type="date">
+          </label>
+          <label class="search-field" for="hero-check-out">
+            <span>Check out</span><input id="hero-check-out" name="check_out" type="date">
+          </label>
+          <div class="search-field guest-search-field">
+            <span>Guests</span>
+            <div class="guest-stepper" aria-label="Number of guests">
+              <button id="guest-minus" type="button" aria-label="Remove a guest">−</button>
+              <output id="guest-output" for="guest-minus guest-plus">2 guests</output>
+              <button id="guest-plus" type="button" aria-label="Add a guest">+</button>
+              <input id="hero-guests" name="guests" type="hidden" value="2">
+            </div>
+          </div>
+          <button class="btn primary search-submit" type="submit">
+            <svg class="line-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path>
+            </svg>
+            Search
+          </button>
+        </form>
+        <p id="search-message" class="search-message" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <section class="spotlight container">
+      <div class="section-head">
+        <div><div class="eyebrow">Guest favorites</div><h2 id="spotlight-title" class="section-title">Hotel spotlight</h2></div>
+        <div class="glass-row">
+          <button id="spot-prev" class="btn" type="button" aria-label="Previous stay">←</button>
+          <button id="spot-next" class="btn primary" type="button" aria-label="Next stay">→</button>
+        </div>
+      </div>
+      <div id="spotlight-stage" class="spotlight-stage"></div>
+      <div class="spotlight-count"><span id="spot-count" class="muted small">00 / 00</span></div>
+    </section>
+
+    <section class="container section" id="stays">
+      <div class="section-head">
+        <div><div class="eyebrow">Places to love</div><h2 class="section-title">Featured stays</h2></div>
+        <a class="btn" href="explore.html">View all</a>
+      </div>
+      <div class="hero-card home-filters">
+        <div class="field">
+          <label for="price-filter">Maximum price per night</label>
+          <select id="price-filter"><option value="10">10</option><option value="50">50</option><option value="100">100</option><option value="all" selected>All</option></select>
+        </div>
+        <div class="field">
+          <label for="home-city">Destination</label>
+          <select id="home-city"><option value="all">All destinations</option></select>
+        </div>
+      </div>
+      <div id="places-list" class="grid grid-3 home-place-grid"></div>
+    </section>
+
+    <section class="container section" id="destinations">
+      <div class="feature-strip">
+        <article class="feature-tile"><div class="eyebrow">01 · Escape</div><h3>Coral mornings</h3><p class="muted">Soft light, warm textures, and stays made for slow days.</p></article>
+        <article class="feature-tile"><div class="eyebrow">02 · Comfort</div><h3>Plan with confidence</h3><p class="muted">Compare dates, guests, pricing, availability, and amenities before you book.</p></article>
+        <article class="feature-tile"><div class="eyebrow">03 · Trust</div><h3>Guest feedback</h3><p class="muted">Read thoughtful reviews and host responses before choosing your stay.</p></article>
+      </div>
+    </section>
+
+    <section class="container section" id="story">
+      <div class="hero-card">
+        <div class="grid grid-2 story-grid">
+          <div><div class="eyebrow">Made for summer</div><h2 class="page-title story-title">A warmer way<br><em>to get away.</em></h2></div>
+          <div class="list">
+            <div class="list-item"><div><strong>Choose your perfect stay</strong><div class="muted small">Compare locations, amenities, dates, and prices in one place.</div></div><span class="badge brown">01</span></div>
+            <div class="list-item"><div><strong>Book with clarity</strong><div class="muted small">Review guest details and your full price before confirming.</div></div><span class="badge red">02</span></div>
+            <div class="list-item"><div><strong>Keep every trip together</strong><div class="muted small">Follow upcoming and past stays from your bookings page.</div></div><span class="badge green">03</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer container">© 2026 HBnB. All rights reserved.</footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="js/common.js?v=20260822c" defer></script>
+  <script src="js/index.js?v=20260822c" defer></script>
+</body>
+</html>

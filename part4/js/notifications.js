@@ -31,7 +31,11 @@ async function loadNotifications() {
                 data-read="${safe(item.id)}">Mark as read</button>`}
         </div>
       </article>
-    `).join("") || '<div class="empty">You are all caught up.</div>';
+    `).join("") || emptyState({
+      icon: "calendar",
+      title: "You are all caught up",
+      text: "New booking and review updates will appear here."
+    });
 
     list.querySelectorAll("[data-read]").forEach((button) => {
       button.addEventListener("click", async () => {
@@ -43,12 +47,16 @@ async function loadNotifications() {
           toast("Marked as read.");
           loadNotifications();
         } catch (error) {
-          toast(error.message);
+          toast(friendlyError(error, "We could not update this notification."));
         }
       });
     });
   } catch (error) {
-    list.innerHTML = `<div class="empty">${safe(error.message)}</div>`;
+    list.innerHTML = emptyState({
+      icon: "calendar",
+      title: "We could not load notifications",
+      text: friendlyError(error)
+    });
   }
 }
 

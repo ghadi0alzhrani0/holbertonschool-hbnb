@@ -22,7 +22,13 @@ async function loadReviewPage() {
 
   const placeId = qs("place_id") || qs("id");
   if (!placeId) {
-    document.getElementById("review-loading").textContent = "No place ID was provided.";
+    document.getElementById("review-loading").innerHTML = emptyState({
+      icon: "search",
+      title: "Choose a stay to review",
+      text: "Open one of your completed bookings to share your experience.",
+      actionHref: "bookings.html",
+      actionLabel: "View bookings"
+    });
     return;
   }
 
@@ -37,12 +43,21 @@ async function loadReviewPage() {
     document.getElementById("review-place-image").src = imageFor(place);
     document.getElementById("review-place-image").alt = place.title || "Place";
     document.getElementById("review-place-name").textContent = place.title || "Stay";
+    const city = place.city_id
+      ? await api(`/cities/${encodeURIComponent(place.city_id)}`).catch(() => null)
+      : null;
     document.getElementById("review-place-location").textContent =
-      place.city_id ? `City ID: ${place.city_id}` : "HBnB destination";
+      city?.name || "HBnB destination";
     document.getElementById("review-place-description").textContent =
       place.description || "Share your experience with future guests.";
   } catch (error) {
-    document.getElementById("review-loading").textContent = error.message;
+    document.getElementById("review-loading").innerHTML = emptyState({
+      icon: "compass",
+      title: "We could not open this review",
+      text: friendlyError(error),
+      actionHref: "bookings.html",
+      actionLabel: "Back to bookings"
+    });
     return;
   }
 
@@ -158,7 +173,7 @@ async function submitReview(event) {
     clearReviewForm(form);
     toast("Review submitted successfully.");
   } catch (error) {
-    showReviewError(error.message || "Failed to submit review.");
+    showReviewError(friendlyError(error, "We could not publish your review."));
   } finally {
     submitButton.disabled = false;
     submitButton.textContent = "Publish review";

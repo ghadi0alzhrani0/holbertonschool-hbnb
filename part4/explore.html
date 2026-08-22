@@ -1,5 +1,82 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Explore HBnB places and destinations."><title>Explore — HBnB</title><link rel="icon" href="images/icon.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Playfair+Display:wght@500;600;700&amp;display=swap" rel="stylesheet"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><link rel="stylesheet" href="css/global.css?v=20260820"><link rel="stylesheet" href="css/explore.css"><link rel="stylesheet" href="css/portal.css?v=20260820"></head><body>
-<header class="site-header"><nav class="nav-shell container" aria-label="Primary navigation"><a class="brand" href="index.html" aria-label="HBnB home"><img class="logo" src="images/logo.png" alt="HBnB logo" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'"><span class="brand-mark" style="display:none">H</span><span class="brand-name">HBNB</span></a><div class="nav-links"><a class="nav-link" data-nav="index.html" href="index.html">Home</a><a class="nav-link" data-nav="explore.html" href="explore.html">Explore</a><a class="nav-link" data-nav="bookings.html" href="bookings.html">Bookings</a></div><div class="nav-actions"><a id="login-link" class="nav-action login-button" href="login.html">Sign in</a><a id="nav-profile" class="nav-action primary" href="profile.html" style="display:none">Profile</a></div></nav></header>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Explore HBnB places and destinations.">
+  <title>Explore - HBnB</title>
+  <link rel="icon" href="images/icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Playfair+Display:wght@500;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="css/global.css?v=20260822c">
+  <link rel="stylesheet" href="css/explore.css?v=20260822c">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav-shell container" aria-label="Primary navigation">
+      <a class="brand" href="index.html" aria-label="HBnB home"><img class="logo" src="images/logo.png" alt="HBnB logo"><span class="brand-name">HBNB</span></a>
+      <div class="nav-links"><a class="nav-link" data-nav="index.html" href="index.html">Home</a><a class="nav-link" data-nav="explore.html" href="explore.html">Explore</a><a class="nav-link" data-nav="bookings.html" href="bookings.html">Bookings</a></div>
+      <div class="nav-actions"><a id="login-link" class="nav-action login-button" href="login.html">Sign in</a><a id="nav-profile" class="nav-action primary" href="profile.html" style="display:none">Profile</a></div>
+    </nav>
+  </header>
 
-<main class="container page"><section class="explore-hero"><div class="explore-copy"><div class="eyebrow" style="color:#ffd7aa">Curated stays</div><h1 class="page-title">Go somewhere<br><em>sunny.</em></h1><p class="page-subtitle" style="color:#fff5ee">Search real HBnB places by location, type, policy, amenity, and price.</p></div></section><section class="section"><div class="section-head"><div><div class="eyebrow">The collection</div><h2 class="section-title">Explore stays</h2></div><span id="explore-count" class="section-note">—</span></div><div class="explore-controls explore-filter-grid"><div class="field"><label for="explore-search">Search</label><input id="explore-search" placeholder="Riyadh, AlUla, villa…"></div><div class="field"><label for="explore-price">Maximum price</label><select id="explore-price"><option value="all">All</option><option value="100">100</option><option value="250">250</option><option value="500">500</option><option value="1000">1000</option><option value="2000">2000</option></select></div><div class="field"><label for="explore-type">Property type</label><select id="explore-type"><option value="all">All types</option></select></div><div class="field"><label for="explore-policy">Cancellation</label><select id="explore-policy"><option value="all">All policies</option></select></div><div class="field"><label for="explore-amenity">Amenity</label><select id="explore-amenity"><option value="all">All amenities</option></select></div></div></section><section class="section explore-layout"><div id="explore-grid" class="grid grid-2"></div><aside class="explore-map"><div class="eyebrow">Map view</div><div id="explore-map" class="map-shell" role="region" aria-label="Map of available places"></div></aside></section><section class="section"><div class="section-head"><div><div class="eyebrow">Summer visual</div><h2 class="section-title">Stay with character.</h2></div></div><div class="mosaic"><div class="mosaic-tile large"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=84" alt="Summer coast"><div class="mosaic-copy"><div class="eyebrow" style="color:#ffd7aa">01 · Escape</div><h3>Slow mornings.<br>Beautiful views.</h3></div></div><div class="mosaic-tile"><img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=84" alt="Summer hotel room"><div class="mosaic-copy"><strong>Designed for detail.</strong></div></div><div class="mosaic-tile"><img src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=900&q=84" alt="Bright interior"><div class="mosaic-copy"><strong>Made to linger.</strong></div></div></div></section></main>
-<footer class="site-footer container">© 2026 HBnB. All rights reserved.</footer><div id="toast" class="toast" role="status" aria-live="polite"></div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="js/common.js?v=20260820c" defer></script><script src="js/explore.js" defer></script></body></html>
+  <main class="container page">
+    <section class="explore-hero">
+      <div class="explore-copy">
+        <div class="eyebrow explore-eyebrow">Curated stays</div>
+        <h1 class="page-title">Go somewhere<br><em>sunny.</em></h1>
+        <p class="page-subtitle explore-subtitle">Find a stay that fits your destination, dates, guests, and budget.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div><div class="eyebrow">Plan your stay</div><h2 class="section-title">Search and filter</h2></div>
+        <button id="clear-explore" class="btn" type="button">Clear filters</button>
+      </div>
+      <form id="explore-form" class="explore-controls" aria-label="Stay filters">
+        <div class="field destination-field"><label for="explore-destination">Destination</label><select id="explore-destination"><option value="all">All destinations</option></select></div>
+        <div class="field"><label for="explore-check-in">Check in</label><input id="explore-check-in" type="date"></div>
+        <div class="field"><label for="explore-check-out">Check out</label><input id="explore-check-out" type="date"></div>
+        <div class="field"><label for="explore-guests">Guests</label><input id="explore-guests" type="number" min="1" max="16" value="1"></div>
+        <div class="field"><label for="explore-price">Maximum price</label><select id="explore-price"><option value="all">Any price</option><option value="100">SAR 100</option><option value="250">SAR 250</option><option value="500">SAR 500</option><option value="1000">SAR 1,000</option><option value="2000">SAR 2,000</option></select></div>
+        <div class="field"><label for="explore-type">Property type</label><select id="explore-type"><option value="all">All types</option></select></div>
+        <div class="field"><label for="explore-policy">Cancellation</label><select id="explore-policy"><option value="all">All policies</option></select></div>
+        <div class="field"><label for="explore-amenity">Amenity</label><select id="explore-amenity"><option value="all">All amenities</option></select></div>
+      </form>
+      <p id="explore-message" class="explore-message" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div><div class="eyebrow">The collection</div><h2 class="section-title">Available stays</h2></div>
+        <span id="explore-count" class="section-note">Loading...</span>
+      </div>
+      <div class="explore-layout">
+        <div id="explore-grid" class="grid grid-2"></div>
+        <aside class="explore-map">
+          <div class="eyebrow">Map view</div>
+          <div id="explore-map" class="map-shell" role="region" aria-label="Map of available places"></div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><div><div class="eyebrow">Summer collection</div><h2 class="section-title">Stay with character.</h2></div></div>
+      <div class="mosaic">
+        <div class="mosaic-tile large"><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&amp;fit=crop&amp;w=1400&amp;q=84" alt="Summer coast"><div class="mosaic-copy"><div class="eyebrow mosaic-eyebrow">Coastal escape</div><h3>Slow mornings.<br>Beautiful views.</h3></div></div>
+        <div class="mosaic-tile"><img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&amp;fit=crop&amp;w=900&amp;q=84" alt="Summer hotel room"><div class="mosaic-copy"><strong>Designed for detail.</strong></div></div>
+        <div class="mosaic-tile"><img src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&amp;fit=crop&amp;w=900&amp;q=84" alt="Bright interior"><div class="mosaic-copy"><strong>Made to linger.</strong></div></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer container">© 2026 HBnB. All rights reserved.</footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/common.js?v=20260822c" defer></script>
+  <script src="js/explore.js?v=20260822c" defer></script>
+</body>
+</html>

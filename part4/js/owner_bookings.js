@@ -33,12 +33,16 @@ function renderOwnerReservations() {
         <td><strong>${safe(booking.guest_name)}</strong><div class="muted small">${safe(booking.user_id.slice(0, 8))}</div></td>
         <td>${safe(booking.place_title)}</td>
         <td>${dateFmt(booking.start_date)}<br><span class="muted small">to ${dateFmt(booking.end_date)}</span></td>
-        <td>${guests ? `${safe(guests.adults_count)} adults<br><span class="muted small">${safe(guests.children_count)} children · ${safe(guests.infants_count)} infants</span>` : "-"}</td>
+        <td>${guests ? `${safe(guests.adults_count)} ${guests.adults_count === 1 ? "adult" : "adults"}<br><span class="muted small">${safe(guests.children_count)} ${guests.children_count === 1 ? "child" : "children"} · ${safe(guests.infants_count)} ${guests.infants_count === 1 ? "infant" : "infants"}</span>` : "-"}</td>
         <td><span class="badge ${booking.status === "cancelled" ? "danger" : "green"}">${safe(booking.status)}</span><div>${money(booking.total_price)}</div></td>
         <td><div class="table-actions">${reservationActions(booking) || '<span class="muted small">No actions</span>'}</div></td>
       </tr>
     `;
-  }).join("") || '<tr><td colspan="6"><div class="empty-state">No reservations match this status.</div></td></tr>';
+  }).join("") || `<tr><td colspan="6">${emptyState({
+    icon: "calendar",
+    title: "No reservations in this view",
+    text: "Choose another status to see more reservations."
+  })}</td></tr>`;
 
   table.querySelectorAll("[data-reservation-id]").forEach((button) => {
     button.addEventListener("click", () => updateReservation(button));
@@ -58,7 +62,7 @@ async function updateReservation(button) {
     toast("Reservation updated.");
     await loadOwnerReservations();
   } catch (error) {
-    toast(error.message);
+    toast(friendlyError(error, "We could not update this reservation."));
   } finally {
     button.disabled = false;
   }
@@ -95,7 +99,7 @@ async function submitGuestReview(event) {
     toast("Guest review published.");
     await loadOwnerReservations();
   } catch (error) {
-    toast(error.message);
+    toast(friendlyError(error, "We could not publish this guest review."));
   } finally {
     button.disabled = false;
   }
@@ -121,7 +125,13 @@ async function loadOwnerReservations() {
     renderOwnerReservations();
   } catch (error) {
     document.getElementById("owner-booking-table").innerHTML =
-      `<tr><td colspan="6"><div class="empty-state">${safe(error.message)}</div></td></tr>`;
+      `<tr><td colspan="6">${emptyState({
+        icon: "suitcase",
+        title: "We could not load reservations",
+        text: friendlyError(error),
+        actionHref: "owner_bookings.html",
+        actionLabel: "Try again"
+      })}</td></tr>`;
   }
 }
 

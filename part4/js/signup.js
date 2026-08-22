@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
         location.href = "login.html?account=owner";
       }
     } catch (error) {
-      errorBox.textContent = error.message;
+      errorBox.textContent = friendlyError(error, "We could not create this account.");
       errorBox.classList.add("show");
     } finally {
       button.disabled = false;

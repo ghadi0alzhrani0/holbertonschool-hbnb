@@ -61,6 +61,13 @@ function isManagementAccount() {
   return isOwnerAccount() || isAdminAccount();
 }
 
+function accountLabel() {
+  if (isAdminAccount()) {
+    return "Administrator";
+  }
+  return isOwnerAccount() ? "Owner" : "Guest";
+}
+
 function authHeaders() {
   const token = getCookie("token");
   return token ? { Authorization: `Bearer ${token}` } : {};
@@ -90,8 +97,22 @@ async function api(path, options = {}) {
   }
 
   if (!response.ok) {
-    const message = data?.error || data?.message || data?.msg
-      || `Request failed (${response.status})`;
+    let message = data?.error || data?.message || data?.msg;
+    if (response.status === 401) {
+      message = path === "/auth/login"
+        ? "The email or password is incorrect."
+        : "Please sign in again to continue.";
+      if (path !== "/auth/login") {
+        removeCookie("token");
+      }
+    } else if (response.status === 403) {
+      message = "You do not have permission to complete this action.";
+    } else if (response.status === 404) {
+      message = "We could not find what you were looking for.";
+    } else if (response.status >= 500) {
+      message = "Something went wrong on our side. Please try again shortly.";
+    }
+    message ||= "We could not complete your request. Please try again.";
     const error = new Error(message);
     error.status = response.status;
     error.data = data;
@@ -99,6 +120,13 @@ async function api(path, options = {}) {
   }
 
   return data;
+}
+
+function friendlyError(error, fallback = "We could not load this page.") {
+  if (!navigator.onLine || error instanceof TypeError) {
+    return "Check your internet connection, then try again.";
+  }
+  return error?.message || fallback;
 }
 
 function safe(value = "") {
@@ -109,6 +137,125 @@ function safe(value = "") {
     "\"": "&quot;",
     "'": "&#039;"
   }[character]));
+}
+
+function lineIcon(name, className = "") {
+  const paths = {
+    calendar: '<rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18"></path>',
+    compass: '<circle cx="12" cy="12" r="9"></circle><path d="m16 8-2.2 5.8L8 16l2.2-5.8L16 8Z"></path>',
+    heart: '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5a5.5 5.5 0 0 0 1-8.9Z"></path>',
+    lock: '<rect x="4" y="10" width="16" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path>',
+    search: '<circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path>',
+    star: '<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z"></path>',
+    suitcase: '<rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"></path>'
+  };
+  return `<svg class="line-icon ${safe(className)}" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${paths[name] || paths.compass}</svg>`;
+}
+
+function emptyState({
+  icon = "compass",
+  title,
+  text,
+  actionHref = "",
+  actionLabel = ""
+}) {
+  const action = actionHref && actionLabel
+    ? `<a class="btn primary" href="${safe(actionHref)}">${safe(actionLabel)}</a>`
+    : "";
+  return `
+    <div class="empty-state-card">
+      <span class="empty-state-icon">${lineIcon(icon)}</span>
+      <h3>${safe(title)}</h3>
+      <p>${safe(text)}</p>
+      ${action}
+    </div>
+  `;
+}
+
+const WISHLIST_KEY = "hbnb_wishlist";
+
+function wishlistIds() {
+  try {
+    const value = JSON.parse(localStorage.getItem(WISHLIST_KEY) || "[]");
+    return Array.isArray(value) ? value.map(String) : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function isWishlisted(placeId) {
+  return wishlistIds().includes(String(placeId));
+}
+
+function toggleWishlist(placeId) {
+  const id = String(placeId);
+  const ids = new Set(wishlistIds());
+  if (ids.has(id)) {
+    ids.delete(id);
+  } else {
+    ids.add(id);
+  }
+  localStorage.setItem(WISHLIST_KEY, JSON.stringify([...ids]));
+  return ids.has(id);
+}
+
+function ratingFor(placeId, reviews = []) {
+  const values = reviews
+    .filter((review) => String(review.place_id) === String(placeId))
+    .map((review) => Number(review.rating))
+    .filter(Number.isFinite);
+  if (!values.length) {
+    return { value: null, label: "New" };
+  }
+  const value = values.reduce((sum, rating) => sum + rating, 0) / values.length;
+  return { value, label: value.toFixed(1) };
+}
+
+function placeLink(placeId, params = {}) {
+  const query = new URLSearchParams({ id: placeId });
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== "" && value !== null && value !== undefined) {
+      query.set(key, value);
+    }
+  });
+  return `place.html?${query}`;
+}
+
+function activatePlaceCards(container, rerender) {
+  if (!container) {
+    return;
+  }
+  container.querySelectorAll("[data-place-href]").forEach((card) => {
+    const open = () => {
+      location.href = card.dataset.placeHref;
+    };
+    card.addEventListener("click", (event) => {
+      if (!event.target.closest("button, a")) {
+        open();
+      }
+    });
+    card.addEventListener("keydown", (event) => {
+      if ((event.key === "Enter" || event.key === " ")
+          && !event.target.closest("button, a")) {
+        event.preventDefault();
+        open();
+      }
+    });
+  });
+  container.querySelectorAll("[data-wishlist]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const saved = toggleWishlist(button.dataset.wishlist);
+      button.classList.toggle("saved", saved);
+      button.setAttribute("aria-pressed", String(saved));
+      button.setAttribute("aria-label", saved ? "Remove from wishlist" : "Save to wishlist");
+      button.title = saved ? "Remove from wishlist" : "Save to wishlist";
+      toast(saved ? "Saved to your wishlist." : "Removed from your wishlist.");
+      if (typeof rerender === "function") {
+        rerender();
+      }
+    });
+  });
 }
 
 function qs(key) {
@@ -225,7 +372,11 @@ function renderNotificationPreview(items) {
         </span>
       </button>
     `).join("")
-    : '<div class="notification-preview-empty">No notifications yet.</div>';
+    : `<div class="notification-preview-empty">
+        ${lineIcon("calendar")}
+        <strong>You are all caught up</strong>
+        <span>New booking and review updates will appear here.</span>
+      </div>`;
 
   list.querySelectorAll("[data-notification-id]").forEach((button) => {
     button.addEventListener("click", async () => {
@@ -236,7 +387,7 @@ function renderNotificationPreview(items) {
         );
         await refreshNotificationCenter(true);
       } catch (error) {
-        toast(error.message);
+        toast(friendlyError(error, "We could not update this notification."));
       }
     });
   });
@@ -298,7 +449,7 @@ function initNotificationCenter() {
       aria-label="Recent notifications">
       <div class="notification-popover-head">
         <strong>Notifications</strong>
-        <span>Updates automatically</span>
+        <span>Your latest updates</span>
       </div>
       <div id="notification-preview-list"></div>
     </section>
@@ -394,6 +545,16 @@ async function fetchUser(id) {
 async function fetchAll(path) {
   const data = await api(path);
   return Array.isArray(data) ? data : (data?.items || data?.data || []);
+}
+
+async function fetchReviewsWithDetails() {
+  const reviews = await fetchAll("/reviews/");
+  if (reviews.every((review) => review.place_id && review.rating)) {
+    return reviews;
+  }
+  return (await Promise.all(reviews.map((review) => (
+    api(`/reviews/${encodeURIComponent(review.id)}`).catch(() => null)
+  )))).filter(Boolean);
 }
 
 document.addEventListener("DOMContentLoaded", initNav);

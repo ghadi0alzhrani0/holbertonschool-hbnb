@@ -3,11 +3,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const errorBox = document.getElementById("login-error");
   const toggleButton = document.getElementById("toggle-password");
 
-  if (new URLSearchParams(location.search).get("account") === "owner") {
-    document.querySelector('input[name="account-type"][value="owner"]')
-      .checked = true;
-  }
-
   toggleButton?.addEventListener("click", () => {
     const passwordInput = document.getElementById("login-password");
     passwordInput.type = passwordInput.type === "password" ? "text" : "password";
@@ -27,15 +22,12 @@ document.addEventListener("DOMContentLoaded", () => {
         method: "POST",
         body: JSON.stringify({
           email: document.getElementById("login-email").value.trim(),
-          password: document.getElementById("login-password").value,
-          account_type: document.querySelector(
-            'input[name="account-type"]:checked'
-          ).value
+          password: document.getElementById("login-password").value
         })
       });
 
       if (!data.access_token) {
-        throw new Error("The API did not return an access token.");
+        throw new Error("Sign in could not be completed. Please try again.");
       }
 
       setCookie("token", data.access_token);
@@ -45,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
         : (nextPage || "user_home.html");
       location.href = destination;
     } catch (error) {
-      errorBox.textContent = error.message;
+      errorBox.textContent = friendlyError(error, "Sign in could not be completed.");
       errorBox.classList.add("show");
     } finally {
       submitButton.disabled = false;

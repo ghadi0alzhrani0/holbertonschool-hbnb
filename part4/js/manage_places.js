@@ -24,10 +24,10 @@ function renderPropertyManager() {
       <article class="property-row">
         <img src="${safe(imageFor(place, index))}" alt="${safe(place.title)}">
         <div class="property-main">
-          <div class="eyebrow">${safe(place.number_rooms)} rooms · ${safe(place.max_guest)} guests</div>
+          <div class="eyebrow">${safe(place.number_rooms)} ${place.number_rooms === 1 ? "room" : "rooms"} · ${safe(place.max_guest)} ${place.max_guest === 1 ? "guest" : "guests"}</div>
           <h3>${safe(place.title)}</h3>
           <p class="muted">${safe(place.description)}</p>
-          <div class="glass-row"><strong>${money(place.price)} / night</strong><span>${periods.length} availability periods</span><span>${rates.length} special rates</span></div>
+          <div class="glass-row"><strong>${money(place.price)} / night</strong><span>${periods.length} availability ${periods.length === 1 ? "period" : "periods"}</span><span>${rates.length} special ${rates.length === 1 ? "rate" : "rates"}</span></div>
           <div class="table-actions"><a class="btn" href="place.html?id=${encodeURIComponent(place.id)}">Public page</a><a class="btn primary" href="add_place.html?id=${encodeURIComponent(place.id)}">Edit property</a><button class="btn danger" type="button" data-delete-place="${safe(place.id)}">Delete</button></div>
         </div>
         <div class="property-tools">
@@ -36,7 +36,15 @@ function renderPropertyManager() {
         </div>
       </article>
     `;
-  }).join("") || '<div class="empty-state">No properties match this search.</div>';
+  }).join("") || emptyState({
+    icon: "search",
+    title: managedPlaces.length ? "No properties match this search" : "Add your first property",
+    text: managedPlaces.length
+      ? "Try another title or clear the search."
+      : "Create a property to start managing availability and seasonal prices.",
+    actionHref: managedPlaces.length ? "manage_places.html" : "add_place.html",
+    actionLabel: managedPlaces.length ? "Clear search" : "Add property"
+  });
 
   container.querySelectorAll("[data-availability-place]").forEach((form) => {
     form.addEventListener("submit", submitAvailability);
@@ -66,7 +74,7 @@ async function submitAvailability(event) {
     toast("Availability added.");
     await loadPropertyManager();
   } catch (error) {
-    toast(error.message);
+    toast(friendlyError(error, "We could not add this availability."));
   }
 }
 
@@ -87,7 +95,7 @@ async function submitPricing(event) {
     toast("Seasonal price added.");
     await loadPropertyManager();
   } catch (error) {
-    toast(error.message);
+    toast(friendlyError(error, "We could not add this seasonal price."));
   }
 }
 
@@ -100,7 +108,7 @@ async function deleteManagedPlace(id) {
     toast("Property deleted.");
     await loadPropertyManager();
   } catch (error) {
-    toast(error.message);
+    toast(friendlyError(error, "We could not delete this property."));
   }
 }
 
@@ -125,8 +133,13 @@ async function loadPropertyManager() {
     managedPricing = rates;
     renderPropertyManager();
   } catch (error) {
-    document.getElementById("property-manager").innerHTML =
-      `<div class="empty-state">${safe(error.message)}</div>`;
+    document.getElementById("property-manager").innerHTML = emptyState({
+      icon: "compass",
+      title: "We could not load your properties",
+      text: friendlyError(error),
+      actionHref: "manage_places.html",
+      actionLabel: "Try again"
+    });
   }
 }
 

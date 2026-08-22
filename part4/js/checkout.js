@@ -48,7 +48,13 @@ async function loadCheckout() {
   }
   const placeId = qs("place_id");
   if (!placeId) {
-    document.getElementById("checkout-loading").textContent = "No place was selected.";
+    document.getElementById("checkout-loading").innerHTML = emptyState({
+      icon: "search",
+      title: "Choose a stay first",
+      text: "Select a property and travel dates before checkout.",
+      actionHref: "explore.html",
+      actionLabel: "Explore stays"
+    });
     return;
   }
 
@@ -79,7 +85,13 @@ async function loadCheckout() {
     document.getElementById("checkout-view").classList.remove("hidden");
     updateCheckoutSummary();
   } catch (error) {
-    document.getElementById("checkout-loading").textContent = error.message;
+    document.getElementById("checkout-loading").innerHTML = emptyState({
+      icon: "suitcase",
+      title: "We could not prepare checkout",
+      text: friendlyError(error),
+      actionHref: "explore.html",
+      actionLabel: "Back to Explore"
+    });
   }
 }
 
@@ -125,7 +137,7 @@ async function submitCheckout(event) {
     });
     location.href = `bookings.html?created=${encodeURIComponent(booking.id)}`;
   } catch (error) {
-    errorBox.textContent = error.message;
+    errorBox.textContent = friendlyError(error, "We could not confirm this booking.");
     errorBox.classList.add("show");
   } finally {
     button.disabled = false;

@@ -5,7 +5,13 @@ let pricing = [];
 async function loadPlacePage() {
   const placeId = qs("id");
   if (!placeId) {
-    document.getElementById("place-loading").textContent = "No place ID was provided.";
+    document.getElementById("place-loading").innerHTML = emptyState({
+      icon: "search",
+      title: "Choose a stay to continue",
+      text: "Open a property from the Explore page to see its full details.",
+      actionHref: "explore.html",
+      actionLabel: "Explore stays"
+    });
     return;
   }
 
@@ -26,9 +32,11 @@ async function loadPlacePage() {
   if (isManagementAccount()) {
     const bookingForm = document.getElementById("booking-form");
     bookingForm.innerHTML = `
-      <div class="empty">
-        Management accounts cannot create guest reservations.
-      </div>
+      ${emptyState({
+        icon: "lock",
+        title: "Guest booking only",
+        text: "Switch to a guest account to reserve a stay."
+      })}
       <a class="btn primary full" href="owner_home.html">
         Open management dashboard
       </a>
@@ -43,8 +51,15 @@ async function loadPlacePage() {
       loadExtendedDetails(placeId),
       loadReviews(placeId)
     ]);
+    updateTotal();
   } catch (error) {
-    document.getElementById("place-loading").textContent = error.message;
+    document.getElementById("place-loading").innerHTML = emptyState({
+      icon: "compass",
+      title: "We could not open this stay",
+      text: friendlyError(error),
+      actionHref: "explore.html",
+      actionLabel: "Back to Explore"
+    });
   }
 }
 
@@ -89,7 +104,11 @@ function displayPlaceDetails(currentPlace) {
         <strong>${safe(amenity.name)}</strong>
       </div>
     `).join("")
-    : '<div class="empty amenities-empty">No amenities are listed.</div>';
+    : emptyState({
+      icon: "compass",
+      title: "Amenities coming soon",
+      text: "The host has not added the amenity list yet."
+    });
 
   document.getElementById("place-gallery").innerHTML = IMAGE_POOL.slice(0, 4)
     .map((image, index) => `
@@ -152,7 +171,11 @@ async function loadExtendedDetails(placeId) {
         </div>
       </article>
     `).join("")
-    : '<div class="empty full-grid">No room details are available.</div>';
+    : emptyState({
+      icon: "compass",
+      title: "Room details coming soon",
+      text: "The host has not added a room breakdown yet."
+    });
 
   document.getElementById("availability").innerHTML = availability.length
     ? availability.map((period) => `
@@ -165,7 +188,11 @@ async function loadExtendedDetails(placeId) {
         </div>
       </article>
     `).join("")
-    : '<div class="empty full-grid">No availability periods are stored.</div>';
+    : emptyState({
+      icon: "calendar",
+      title: "Choose your dates",
+      text: "Use the booking form to check the dates you want."
+    });
 
   document.getElementById("seasonal-pricing").innerHTML = pricing.length
     ? pricing.map((rate) => `
@@ -177,7 +204,11 @@ async function loadExtendedDetails(placeId) {
         </div>
       </article>
     `).join("")
-    : '<div class="empty full-grid">No seasonal prices are stored.</div>';
+    : emptyState({
+      icon: "calendar",
+      title: "Standard price applies",
+      text: "There are no special seasonal rates for this stay."
+    });
 
   if (policy) {
     const section = document.getElementById("cancellation-policy");
@@ -206,6 +237,13 @@ async function loadReviews(placeId) {
       response: responses.find((item) => item.review_id === review.id)
     };
   }));
+
+  const values = reviewsWithUsers
+    .map((review) => Number(review.rating))
+    .filter(Number.isFinite);
+  document.getElementById("place-rating").textContent = values.length
+    ? `${(values.reduce((sum, value) => sum + value, 0) / values.length).toFixed(1)} from ${values.length} ${values.length === 1 ? "review" : "reviews"}`
+    : "New stay";
 
   document.getElementById("reviews").innerHTML = reviewsWithUsers.length
     ? reviewsWithUsers.map((review) => {
@@ -238,7 +276,11 @@ async function loadReviews(placeId) {
         </article>
       `;
     }).join("")
-    : '<div class="empty reviews-empty">No reviews yet.</div>';
+    : emptyState({
+      icon: "star",
+      title: "No reviews yet",
+      text: "Be the first guest to share an experience after a completed stay."
+    });
 }
 
 function datesOverlap(start, end) {
@@ -342,11 +384,6 @@ async function createBooking(event) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  loadPlacePage();
-  ["check-in", "check-out", "adults-count", "children-count", "infants-count"]
-    .forEach((id) => document.getElementById(id)?.addEventListener("input", updateTotal));
-  document.getElementById("booking-form")?.addEventListener("submit", createBooking);
-
   const today = new Date();
   const checkIn = document.getElementById("check-in");
   const checkOut = document.getElementById("check-out");
@@ -355,5 +392,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
     checkOut.min = dateInputValue(tomorrow);
+    checkIn.value = qs("check_in") || "";
+    checkOut.value = qs("check_out") || "";
+    const guests = Number(qs("guests"));
+    if (Number.isFinite(guests) && guests >= 1) {
+      document.getElementById("adults-count").value = String(Math.min(16, guests));
+    }
   }
+
+  loadPlacePage();
+  ["check-in", "check-out", "adults-count", "children-count", "infants-count"]
+    .forEach((id) => document.getElementById(id)?.addEventListener("input", updateTotal));
+  document.getElementById("booking-form")?.addEventListener("submit", createBooking);
 });

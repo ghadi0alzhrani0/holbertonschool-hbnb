@@ -44,9 +44,15 @@ function renderManagementProperties() {
     .slice(0, 6).map((place, index) => `
       <article class="place-card">
         <div class="cover"><img src="${safe(imageFor(place, index))}" alt="${safe(place.title)}"></div>
-        <div class="place-body"><div class="place-meta"><span>${safe(place.number_rooms ?? 0)} rooms</span><span>${money(place.price)} / night</span></div><h3 class="place-title">${safe(place.title)}</h3><a class="details-button" href="add_place.html?id=${encodeURIComponent(place.id)}">Edit property</a></div>
+        <div class="place-body"><div class="place-meta"><span>${safe(place.number_rooms ?? 0)} ${(place.number_rooms ?? 0) === 1 ? "room" : "rooms"}</span><span>${money(place.price)} / night</span></div><h3 class="place-title">${safe(place.title)}</h3><a class="details-button" href="add_place.html?id=${encodeURIComponent(place.id)}">Edit property</a></div>
       </article>
-    `).join("") || '<div class="empty-state full-grid">No properties are assigned.</div>';
+    `).join("") || emptyState({
+      icon: "compass",
+      title: "Add your first property",
+      text: "Published properties and their performance will appear here.",
+      actionHref: "add_place.html",
+      actionLabel: "Add property"
+    });
 }
 
 function renderPendingBookings() {
@@ -58,7 +64,11 @@ function renderPendingBookings() {
       <div><h3>${safe(booking.place_title)}</h3><p class="muted small">${safe(booking.guest_name)} · ${dateFmt(booking.start_date)} to ${dateFmt(booking.end_date)}</p><strong>${money(booking.total_price)}</strong></div>
       <div class="table-actions">${managementBookingActions(booking)}</div>
     </article>
-  `).join("") || '<div class="empty-state">No pending reservations.</div>';
+  `).join("") || emptyState({
+    icon: "calendar",
+    title: "No pending reservations",
+    text: "New booking requests will appear here for your review."
+  });
   container.querySelectorAll("[data-home-booking]").forEach((button) => {
     button.addEventListener("click", async () => {
       button.disabled = true;
@@ -70,7 +80,7 @@ function renderPendingBookings() {
         toast("Reservation updated.");
         await loadManagementHome();
       } catch (error) {
-        toast(error.message);
+        toast(friendlyError(error, "We could not update this reservation."));
       } finally {
         button.disabled = false;
       }
@@ -99,7 +109,11 @@ async function renderManagementReviews() {
         ${response ? `<div class="muted small"><strong>Response:</strong> ${safe(response.response_text)}</div>` : `<form class="form" data-response-review="${safe(review.id)}" data-response-owner="${safe(place?.business_owner_id || "")}"><div class="field"><label>Reply to guest</label><textarea required></textarea></div><button class="btn" type="submit">Publish response</button></form>`}
       </article>
     `;
-  }).join("") || '<div class="empty-state full-grid">No reviews yet.</div>';
+  }).join("") || emptyState({
+    icon: "star",
+    title: "No guest reviews yet",
+    text: "Reviews and your responses will appear here after completed stays."
+  });
   container.querySelectorAll("[data-response-review]").forEach((form) => {
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -115,7 +129,7 @@ async function renderManagementReviews() {
         toast("Response published.");
         await renderManagementReviews();
       } catch (error) {
-        toast(error.message);
+        toast(friendlyError(error, "We could not publish this response."));
       }
     });
   });
@@ -148,7 +162,7 @@ async function loadManagementHome() {
     renderPendingBookings();
     await renderManagementReviews();
   } catch (error) {
-    toast(error.message);
+    toast(friendlyError(error, "We could not load the management dashboard."));
   }
 }
 

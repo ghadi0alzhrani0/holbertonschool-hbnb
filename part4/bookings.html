@@ -1,5 +1,78 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Real HBnB reservations and booking history."><title>Bookings — HBnB</title><link rel="icon" href="images/icon.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Playfair+Display:wght@500;600;700&amp;display=swap" rel="stylesheet"><link rel="stylesheet" href="css/global.css?v=20260820"><link rel="stylesheet" href="css/bookings.css"><link rel="stylesheet" href="css/portal.css?v=20260820"></head><body>
-<header class="site-header"><nav class="nav-shell container" aria-label="Primary navigation"><a class="brand" href="index.html" aria-label="HBnB home"><img class="logo" src="images/logo.png" alt="HBnB logo" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'"><span class="brand-mark" style="display:none">H</span><span class="brand-name">HBNB</span></a><div class="nav-links"><a class="nav-link" data-nav="index.html" href="index.html">Home</a><a class="nav-link" data-nav="explore.html" href="explore.html">Explore</a><a class="nav-link" data-nav="bookings.html" href="bookings.html">Bookings</a></div><div class="nav-actions"><a id="login-link" class="nav-action login-button" href="login.html">Sign in</a><a id="nav-profile" class="nav-action primary" href="profile.html" style="display:none">Profile</a></div></nav></header>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="View and manage your HBnB trips.">
+  <title>Bookings - HBnB</title>
+  <link rel="icon" href="images/icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Playfair+Display:wght@500;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/global.css?v=20260822c">
+  <link rel="stylesheet" href="css/bookings.css?v=20260822c">
+  <link rel="stylesheet" href="css/portal.css?v=20260822c">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav-shell container" aria-label="Primary navigation">
+      <a class="brand" href="index.html" aria-label="HBnB home"><img class="logo" src="images/logo.png" alt="HBnB logo"><span class="brand-name">HBNB</span></a>
+      <div class="nav-links"><a class="nav-link" data-nav="index.html" href="index.html">Home</a><a class="nav-link" data-nav="explore.html" href="explore.html">Explore</a><a class="nav-link" data-nav="bookings.html" href="bookings.html">Bookings</a></div>
+      <div class="nav-actions"><a id="login-link" class="nav-action login-button" href="login.html">Sign in</a><a id="nav-profile" class="nav-action primary" href="profile.html" style="display:none">Profile</a></div>
+    </nav>
+  </header>
 
-<main class="container page"><div class="eyebrow">Your stays</div><h1 class="page-title">Bookings<br><em>that matter.</em></h1><p class="page-subtitle">Real reservations from your account, with status updates and direct links back to every stay.</p><section class="hero-card"><div class="stat-strip"><div class="stat"><span class="muted small">Total bookings</span><strong id="booking-count">—</strong></div><div class="stat"><span class="muted small">History events</span><strong id="history-count">—</strong></div><div class="stat"><span class="muted small">Session</span><strong>JWT</strong></div><div class="stat"><span class="muted small">Status</span><strong style="color:var(--green)">Live</strong></div></div></section><section class="section"><div class="section-head"><div><div class="eyebrow">Reservation timeline</div><h2 class="section-title">Your bookings</h2></div><a class="btn primary" href="explore.html">Find a stay →</a></div><div id="booking-list" class="booking-list"></div><div id="booking-empty" class="empty hidden">No bookings yet. Explore a stay and make your first reservation.</div></section></main>
-<div id="review-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="review-modal-title"><form id="booking-review-form" class="modal-panel form"><div class="modal-head"><div><div class="eyebrow">Completed stay</div><h2 id="review-modal-title" class="section-title">Review your stay</h2></div><button id="close-review-modal" class="icon-button" type="button" aria-label="Close">×</button></div><input id="review-booking-place" type="hidden"><div class="field"><label for="booking-review-text">Your review</label><textarea id="booking-review-text" maxlength="1200" required></textarea></div><div class="rating-fields"><div class="field"><label for="booking-overall">Overall</label><select id="booking-overall" required><option value="">Choose</option><option value="5">5</option><option value="4">4</option><option value="3">3</option><option value="2">2</option><option value="1">1</option></select></div><div class="field"><label for="booking-cleanliness">Cleanliness</label><input id="booking-cleanliness" type="number" min="1" max="5" value="5" required></div><div class="field"><label for="booking-accuracy">Accuracy</label><input id="booking-accuracy" type="number" min="1" max="5" value="5" required></div><div class="field"><label for="booking-communication">Communication</label><input id="booking-communication" type="number" min="1" max="5" value="5" required></div><div class="field"><label for="booking-location">Location</label><input id="booking-location" type="number" min="1" max="5" value="5" required></div><div class="field"><label for="booking-check-in">Check in</label><input id="booking-check-in" type="number" min="1" max="5" value="5" required></div><div class="field"><label for="booking-value">Value</label><input id="booking-value" type="number" min="1" max="5" value="5" required></div></div><button id="booking-review-submit" class="btn primary full" type="submit">Publish review</button></form></div><footer class="site-footer container">© 2026 HBnB. All rights reserved.</footer><div id="toast" class="toast" role="status" aria-live="polite"></div><script src="js/common.js?v=20260820c" defer></script><script src="js/bookings.js" defer></script></body></html>
+  <main class="container page">
+    <div class="eyebrow">Your trips</div>
+    <h1 class="page-title">Every stay,<br><em>in one place.</em></h1>
+    <p class="page-subtitle">Follow upcoming plans, revisit completed stays, or manage a booking before your trip.</p>
+
+    <section id="booking-summary" class="section booking-summary" aria-label="Booking summary">
+      <div class="stat"><span class="muted small">Upcoming</span><strong id="upcoming-count">0</strong></div>
+      <div class="stat"><span class="muted small">Completed</span><strong id="completed-count">0</strong></div>
+      <div class="stat"><span class="muted small">Cancelled</span><strong id="cancelled-count">0</strong></div>
+      <div class="stat"><span class="muted small">All trips</span><strong id="booking-count">0</strong></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div><div class="eyebrow">Trip planner</div><h2 class="section-title">Your bookings</h2></div>
+        <a class="btn primary" href="explore.html">Find a stay</a>
+      </div>
+      <div id="booking-tabs" class="booking-tabs" role="tablist" aria-label="Filter bookings">
+        <button class="booking-tab active" type="button" role="tab" aria-selected="true" data-booking-filter="all">All</button>
+        <button class="booking-tab" type="button" role="tab" aria-selected="false" data-booking-filter="upcoming">Upcoming</button>
+        <button class="booking-tab" type="button" role="tab" aria-selected="false" data-booking-filter="completed">Completed</button>
+        <button class="booking-tab" type="button" role="tab" aria-selected="false" data-booking-filter="cancelled">Cancelled</button>
+      </div>
+      <div id="booking-list" class="booking-list" role="tabpanel"></div>
+    </section>
+  </main>
+
+  <div id="review-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="review-modal-title">
+    <form id="booking-review-form" class="modal-panel form">
+      <div class="modal-head">
+        <div><div class="eyebrow">Completed stay</div><h2 id="review-modal-title" class="section-title">Review your stay</h2></div>
+        <button id="close-review-modal" class="icon-button" type="button" aria-label="Close review form">×</button>
+      </div>
+      <input id="review-booking-place" type="hidden">
+      <div class="field"><label for="booking-review-text">Your review</label><textarea id="booking-review-text" maxlength="1200" required></textarea></div>
+      <div class="rating-fields">
+        <div class="field"><label for="booking-overall">Overall</label><select id="booking-overall" required><option value="">Choose</option><option value="5">5</option><option value="4">4</option><option value="3">3</option><option value="2">2</option><option value="1">1</option></select></div>
+        <div class="field"><label for="booking-cleanliness">Cleanliness</label><input id="booking-cleanliness" type="number" min="1" max="5" value="5" required></div>
+        <div class="field"><label for="booking-accuracy">Accuracy</label><input id="booking-accuracy" type="number" min="1" max="5" value="5" required></div>
+        <div class="field"><label for="booking-communication">Communication</label><input id="booking-communication" type="number" min="1" max="5" value="5" required></div>
+        <div class="field"><label for="booking-location">Location</label><input id="booking-location" type="number" min="1" max="5" value="5" required></div>
+        <div class="field"><label for="booking-check-in">Check in</label><input id="booking-check-in" type="number" min="1" max="5" value="5" required></div>
+        <div class="field"><label for="booking-value">Value</label><input id="booking-value" type="number" min="1" max="5" value="5" required></div>
+      </div>
+      <button id="booking-review-submit" class="btn primary full" type="submit">Publish review</button>
+    </form>
+  </div>
+
+  <footer class="site-footer container">© 2026 HBnB. All rights reserved.</footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="js/common.js?v=20260822c" defer></script>
+  <script src="js/bookings.js?v=20260822c" defer></script>
+</body>
+</html>

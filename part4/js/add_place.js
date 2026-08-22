@@ -111,7 +111,7 @@ async function loadPlaceEditor() {
       await loadExistingPlace(placeEditorId);
     }
   } catch (error) {
-    toast(error.message);
+    toast(friendlyError(error, "We could not prepare the property form."));
   }
 }
 
@@ -177,7 +177,7 @@ async function savePlace(event) {
     toast("Property saved.");
     location.href = "manage_places.html";
   } catch (error) {
-    errorBox.textContent = error.message;
+    errorBox.textContent = friendlyError(error, "We could not save this property.");
     errorBox.classList.add("show");
     showPlaceEditorStep(3);
   } finally {

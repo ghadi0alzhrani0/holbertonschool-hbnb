@@ -8,6 +8,33 @@ function bookingProgress(status) {
   `).join("");
 }
 
+function guestRecommendationCard(place, index, cities, reviews) {
+  const rating = ratingFor(place.id, reviews);
+  const href = placeLink(place.id);
+  const saved = isWishlisted(place.id);
+  return `
+    <article class="place-card" role="link" tabindex="0" data-place-href="${safe(href)}">
+      <button class="wishlist-button ${saved ? "saved" : ""}" type="button"
+        data-wishlist="${safe(place.id)}" aria-pressed="${saved}"
+        aria-label="${saved ? "Remove from wishlist" : "Save to wishlist"}">
+        ${lineIcon("heart")}
+      </button>
+      <div class="cover"><img src="${safe(imageFor(place, index + 1))}" alt="${safe(place.title)}"></div>
+      <div class="place-body">
+        <div class="place-meta">
+          <span>${safe(cities.get(place.city_id) || "Saudi Arabia")}</span>
+          <span class="place-card-rating">${lineIcon("star")} ${rating.label}</span>
+        </div>
+        <h3 class="place-title">${safe(place.title)}</h3>
+        <div class="glass-row place-card-actions">
+          <span class="place-price">${money(place.price)} <span class="muted small">night</span></span>
+          <a class="details-button" href="${safe(href)}">View details</a>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
 async function loadGuestHome() {
   if (!authOrLogin(location.href)) {
     return;
@@ -19,11 +46,13 @@ async function loadGuestHome() {
 
   const identity = tokenPayload()?.sub;
   try {
-    const [user, bookings, places, notifications] = await Promise.all([
+    const [user, bookings, places, notifications, cities, reviews] = await Promise.all([
       fetchUser(identity),
       fetchAll("/bookings/"),
       fetchPlaces(),
-      fetchAll("/notifications/").catch(() => [])
+      fetchAll("/notifications/").catch(() => []),
+      fetchAll("/cities/").catch(() => []),
+      fetchReviewsWithDetails().catch(() => [])
     ]);
     document.getElementById("guest-name").textContent = user.first_name;
     document.getElementById("guest-booking-count").textContent = bookings.length;
@@ -49,17 +78,28 @@ async function loadGuestHome() {
         </div>
         <a class="btn" href="bookings.html">Details</a>
       </article>
-    ` : '<div class="empty-state">No active booking. Your next destination is waiting.</div>';
+    ` : emptyState({
+      icon: "suitcase",
+      title: "No upcoming trip",
+      text: "Your next destination is waiting whenever you are ready.",
+      actionHref: "explore.html",
+      actionLabel: "Find a stay"
+    });
 
-    document.getElementById("guest-recommendations").innerHTML = places
-      .slice(0, 3).map((place, index) => `
-        <article class="place-card">
-          <div class="cover"><img src="${safe(imageFor(place, index + 1))}" alt="${safe(place.title)}"></div>
-          <div class="place-body"><div class="place-meta"><span>${safe(place.number_rooms)} rooms</span><span>${money(place.price)} / night</span></div><h3 class="place-title">${safe(place.title)}</h3><a class="details-button" href="place.html?id=${encodeURIComponent(place.id)}">View Details</a></div>
-        </article>
-      `).join("") || '<div class="empty-state full-grid">No recommendations available.</div>';
+    const recommendations = document.getElementById("guest-recommendations");
+    const cityMap = new Map(cities.map((city) => [city.id, city.name]));
+    recommendations.innerHTML = places.length
+      ? places.slice(0, 3).map((place, index) => (
+        guestRecommendationCard(place, index, cityMap, reviews)
+      )).join("")
+      : emptyState({
+        icon: "compass",
+        title: "More stays are coming soon",
+        text: "New destinations will appear here as hosts add their properties."
+      });
+    activatePlaceCards(recommendations, () => loadGuestHome());
   } catch (error) {
-    toast(error.message);
+    toast(friendlyError(error, "We could not load your home page."));
   }
 }
 

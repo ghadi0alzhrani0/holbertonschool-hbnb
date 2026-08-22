@@ -47,7 +47,13 @@ function renderOwnerProperties(properties) {
         </a>
       </div>
     </article>
-  `).join("") || '<div class="empty full-grid">No properties assigned.</div>';
+  `).join("") || emptyState({
+    icon: "compass",
+    title: "Add your first property",
+    text: "Your listed properties will appear here.",
+    actionHref: "add_place.html",
+    actionLabel: "Add property"
+  });
 }
 
 function renderOwnerBookings(bookings) {
@@ -71,7 +77,11 @@ function renderOwnerBookings(bookings) {
         ${ownerBookingActions(booking)}
       </div>
     </article>
-  `).join("") || '<div class="empty">No reservations received.</div>';
+  `).join("") || emptyState({
+    icon: "calendar",
+    title: "No reservations yet",
+    text: "New guest reservations will appear here."
+  });
 
   container.querySelectorAll("[data-booking-action]").forEach((button) => {
     button.addEventListener("click", () => updateOwnerBooking(button));
@@ -88,7 +98,7 @@ async function updateOwnerBooking(button) {
     toast("Reservation updated.");
     await loadOwnerDashboard();
   } catch (error) {
-    toast(error.message);
+    toast(friendlyError(error, "We could not update this reservation."));
   } finally {
     button.disabled = false;
   }
@@ -121,11 +131,16 @@ async function loadOwnerDashboard() {
     renderOwnerProperties(properties);
     renderOwnerBookings(bookings);
   } catch (error) {
-    toast(error.message);
-    document.getElementById("owner-properties").innerHTML =
-      `<div class="empty full-grid">${safe(error.message)}</div>`;
-    document.getElementById("owner-bookings").innerHTML =
-      `<div class="empty">${safe(error.message)}</div>`;
+    toast(friendlyError(error, "We could not load the owner dashboard."));
+    const state = emptyState({
+      icon: "compass",
+      title: "We could not load the dashboard",
+      text: friendlyError(error),
+      actionHref: "owner_dashboard.html",
+      actionLabel: "Try again"
+    });
+    document.getElementById("owner-properties").innerHTML = state;
+    document.getElementById("owner-bookings").innerHTML = state;
   }
 }
 
