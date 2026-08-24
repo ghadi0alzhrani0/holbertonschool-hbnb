@@ -1,6 +1,48 @@
 let placeEditorStep = 0;
 let placeEditorId = null;
 let editorAmenities = [];
+let placeEditorImage = null;
+
+function showPlaceImage(imageData) {
+  placeEditorImage = imageData || null;
+  const preview = document.getElementById("place-image-preview");
+  const image = document.getElementById("place-image-preview-img");
+  preview.classList.toggle("hidden", !placeEditorImage);
+  image.src = placeEditorImage || "";
+}
+
+function preparePlaceImage(file) {
+  return new Promise((resolve, reject) => {
+    if (!file?.type.startsWith("image/")) {
+      reject(new Error("Choose a JPG, PNG, or WebP image."));
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      reject(new Error("Choose an image smaller than 10 MB."));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("We could not read this image."));
+    reader.onload = () => {
+      const source = new Image();
+      source.onerror = () => reject(new Error("We could not open this image."));
+      source.onload = () => {
+        const scale = Math.min(1, 1600 / source.width, 1200 / source.height);
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(source.width * scale));
+        canvas.height = Math.max(1, Math.round(source.height * scale));
+        const context = canvas.getContext("2d");
+        context.fillStyle = "#fff";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(source, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.82));
+      };
+      source.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
 function showPlaceEditorStep(step) {
   placeEditorStep = Math.max(0, Math.min(3, step));
@@ -61,6 +103,7 @@ async function loadExistingPlace(id) {
   document.getElementById("place-editor-title").innerHTML = "Edit your<br><em>property.</em>";
   setEditorValue("place-title-input", place.title);
   setEditorValue("place-description-input", place.description);
+  showPlaceImage(place.image_url);
   setEditorValue("place-type-input", place.place_type_id);
   setEditorValue("place-policy-input", place.cancellation_policy_id);
   setEditorValue("place-business-owner-input", place.business_owner_id);
@@ -84,27 +127,22 @@ async function loadPlaceEditor() {
   if (!authOrLogin(location.href)) {
     return;
   }
-  if (!isManagementAccount()) {
-    location.href = "user_home.html";
+  if (!isOwnerAccount()) {
+    location.href = accountHome();
     return;
   }
   placeEditorId = qs("id");
   try {
-    const [types, policies, cities, amenities, owners] = await Promise.all([
+    const [types, policies, cities, amenities] = await Promise.all([
       fetchAll("/place-types/"),
       fetchAll("/cancellation-policies/"),
       fetchAll("/cities/"),
-      fetchAll("/amenities/"),
-      isAdminAccount() ? fetchAll("/owners/") : Promise.resolve([])
+      fetchAll("/amenities/")
     ]);
     editorAmenities = amenities;
     fillSelect("place-type-input", types, "Choose property type");
     fillSelect("place-policy-input", policies, "Choose policy");
     fillSelect("place-city-input", cities, "Choose city");
-    if (isAdminAccount()) {
-      document.getElementById("admin-owner-field").classList.remove("hidden");
-      fillSelect("place-business-owner-input", owners, "No business owner");
-    }
     renderAmenityPicker(amenities);
     addRoomRow();
     if (placeEditorId) {
@@ -119,6 +157,7 @@ function editorPayload() {
   const payload = {
     title: document.getElementById("place-title-input").value.trim(),
     description: document.getElementById("place-description-input").value.trim(),
+    image_url: placeEditorImage,
     price: Number(document.getElementById("place-price-input").value),
     latitude: Number(document.getElementById("place-latitude-input").value),
     longitude: Number(document.getElementById("place-longitude-input").value),
@@ -131,9 +170,6 @@ function editorPayload() {
     amenities: [...document.querySelectorAll('input[name="amenities"]:checked')]
       .map((input) => input.value)
   };
-  if (isAdminAccount() && document.getElementById("place-business-owner-input").value) {
-    payload.business_owner_id = document.getElementById("place-business-owner-input").value;
-  }
   return payload;
 }
 
@@ -203,5 +239,21 @@ document.addEventListener("DOMContentLoaded", () => {
     showPlaceEditorStep(placeEditorStep + 1);
   });
   document.getElementById("add-room-row")?.addEventListener("click", () => addRoomRow());
+  document.getElementById("place-image-input")?.addEventListener("change", async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+    try {
+      showPlaceImage(await preparePlaceImage(file));
+    } catch (error) {
+      event.target.value = "";
+      toast(error.message);
+    }
+  });
+  document.getElementById("remove-place-image")?.addEventListener("click", () => {
+    document.getElementById("place-image-input").value = "";
+    showPlaceImage(null);
+  });
   document.getElementById("place-editor-form")?.addEventListener("submit", savePlace);
 });

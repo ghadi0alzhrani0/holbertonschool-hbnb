@@ -51,6 +51,7 @@ class Place(BaseModel):
 
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, default="", nullable=False)
+    image_url = db.Column(db.Text, nullable=True)
     price = db.Column(db.Float, nullable=False)
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
@@ -136,7 +137,8 @@ class Place(BaseModel):
         number_rooms=0,
         number_bathrooms=0,
         max_guest=1,
-        business_owner=None
+        business_owner=None,
+        image_url=None
     ):
         """Initialize a place with validated attributes."""
         super().__init__()
@@ -150,6 +152,7 @@ class Place(BaseModel):
         self.place_type = place_type
         self.cancellation_policy = cancellation_policy
         self.business_owner = business_owner
+        self.image_url = image_url
         self.number_rooms = number_rooms
         self.number_bathrooms = number_bathrooms
         self.max_guest = max_guest
@@ -190,6 +193,17 @@ class Place(BaseModel):
             value = ""
         if not isinstance(value, str):
             raise ValueError("Description must be a string")
+        return value
+
+    @validates("image_url")
+    def validate_image_url(self, key, value):
+        """Validate an optional hosted URL or browser image data URL."""
+        if value in (None, ""):
+            return None
+        if not isinstance(value, str):
+            raise ValueError("Image must be a string")
+        if not value.startswith(("http://", "https://", "data:image/")):
+            raise ValueError("Image must be a valid image URL")
         return value
 
     @validates("price")

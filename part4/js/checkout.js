@@ -29,11 +29,10 @@ function updateCheckoutSummary() {
   const end = document.getElementById("checkout-end").value;
   const adults = Number(document.getElementById("checkout-adults").value || 0);
   const children = Number(document.getElementById("checkout-children").value || 0);
-  const infants = Number(document.getElementById("checkout-infants").value || 0);
   const nights = start && end && end > start ? checkoutNights(start, end) : 0;
   document.getElementById("checkout-rate").textContent = money(checkoutPlace.price);
   document.getElementById("checkout-nights").textContent = nights;
-  document.getElementById("checkout-guests").textContent = adults + children + infants;
+  document.getElementById("checkout-guests").textContent = adults + children;
   document.getElementById("checkout-total").textContent = nights
     ? money(checkoutEstimate(start, end)) : "SAR -";
 }
@@ -43,7 +42,7 @@ async function loadCheckout() {
     return;
   }
   if (isManagementAccount()) {
-    location.href = "owner_home.html";
+    location.href = isAdminAccount() ? "admin_home.html" : "owner_home.html";
     return;
   }
   const placeId = qs("place_id");
@@ -73,7 +72,6 @@ async function loadCheckout() {
     document.getElementById("checkout-end").value = qs("end_date") || "";
     document.getElementById("checkout-adults").value = qs("adults") || 2;
     document.getElementById("checkout-children").value = qs("children") || 0;
-    document.getElementById("checkout-infants").value = qs("infants") || 0;
     const policy = place.cancellation_policy_id
       ? await api(`/cancellation-policies/${encodeURIComponent(place.cancellation_policy_id)}`).catch(() => null)
       : null;
@@ -103,13 +101,12 @@ async function submitCheckout(event) {
   const end = document.getElementById("checkout-end").value;
   const adults = Number(document.getElementById("checkout-adults").value);
   const children = Number(document.getElementById("checkout-children").value || 0);
-  const infants = Number(document.getElementById("checkout-infants").value || 0);
   if (!start || !end || end <= start) {
     errorBox.textContent = "Check-out must be after check-in.";
     errorBox.classList.add("show");
     return;
   }
-  if (adults < 1 || adults + children + infants > checkoutPlace.max_guest) {
+  if (adults < 1 || adults + children > checkoutPlace.max_guest) {
     errorBox.textContent = `Choose between 1 and ${checkoutPlace.max_guest} guests.`;
     errorBox.classList.add("show");
     return;
@@ -132,7 +129,7 @@ async function submitCheckout(event) {
         booking_id: booking.id,
         adults_count: adults,
         children_count: children,
-        infants_count: infants
+        infants_count: 0
       })
     });
     location.href = `bookings.html?created=${encodeURIComponent(booking.id)}`;
@@ -148,6 +145,6 @@ async function submitCheckout(event) {
 document.addEventListener("DOMContentLoaded", () => {
   loadCheckout();
   document.getElementById("checkout-form")?.addEventListener("submit", submitCheckout);
-  ["checkout-start", "checkout-end", "checkout-adults", "checkout-children", "checkout-infants"]
+  ["checkout-start", "checkout-end", "checkout-adults", "checkout-children"]
     .forEach((id) => document.getElementById(id)?.addEventListener("input", updateCheckoutSummary));
 });

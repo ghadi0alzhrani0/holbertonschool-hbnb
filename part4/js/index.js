@@ -160,7 +160,7 @@ function displaySpotlight() {
           <h3>${safe(place.title || "Stay")}</h3>
           <p>${safe(placeLocation(place))}</p>
           <div class="glass-row spotlight-actions">
-            <span class="badge">${money(place.price)} / night</span>
+            <span class="badge spotlight-price">${money(place.price)} / night</span>
             <a class="btn sun" href="${safe(href)}">View details</a>
           </div>
         </div>

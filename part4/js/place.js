@@ -31,13 +31,14 @@ async function loadPlacePage() {
 
   if (isManagementAccount()) {
     const bookingForm = document.getElementById("booking-form");
+    const dashboard = isAdminAccount() ? "admin_home.html" : "owner_home.html";
     bookingForm.innerHTML = `
       ${emptyState({
         icon: "lock",
         title: "Guest booking only",
         text: "Switch to a guest account to reserve a stay."
       })}
-      <a class="btn primary full" href="owner_home.html">
+      <a class="btn primary full" href="${dashboard}">
         Open management dashboard
       </a>
     `;
@@ -110,7 +111,10 @@ function displayPlaceDetails(currentPlace) {
       text: "The host has not added the amenity list yet."
     });
 
-  document.getElementById("place-gallery").innerHTML = IMAGE_POOL.slice(0, 4)
+  const galleryImages = [currentPlace.image_url, ...IMAGE_POOL]
+    .filter((image, index, list) => image && list.indexOf(image) === index)
+    .slice(0, 4);
+  document.getElementById("place-gallery").innerHTML = galleryImages
     .map((image, index) => `
       <img class="${index === 0 ? "main" : ""}" src="${safe(image)}"
         alt="${safe(title)} view ${index + 1}">
@@ -321,7 +325,7 @@ function updateTotal() {
   }
 
   const nights = numberOfNights(start, end);
-  const guests = ["adults-count", "children-count", "infants-count"]
+  const guests = ["adults-count", "children-count"]
     .reduce((total, id) => total + Number(document.getElementById(id).value || 0), 0);
 
   if (end <= start || nights < 1) {
@@ -352,8 +356,7 @@ async function createBooking(event) {
   const endDate = document.getElementById("check-out").value;
   const adults = Number(document.getElementById("adults-count").value);
   const children = Number(document.getElementById("children-count").value || 0);
-  const infants = Number(document.getElementById("infants-count").value || 0);
-  const guestCount = adults + children + infants;
+  const guestCount = adults + children;
 
   if (!startDate || !endDate || endDate <= startDate) {
     toast("Please choose valid dates.");
@@ -377,8 +380,7 @@ async function createBooking(event) {
     start_date: startDate,
     end_date: endDate,
     adults: String(adults),
-    children: String(children),
-    infants: String(infants)
+    children: String(children)
   });
   location.href = `checkout.html?${query}`;
 }
@@ -401,7 +403,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   loadPlacePage();
-  ["check-in", "check-out", "adults-count", "children-count", "infants-count"]
+  ["check-in", "check-out", "adults-count", "children-count"]
     .forEach((id) => document.getElementById(id)?.addEventListener("input", updateTotal));
   document.getElementById("booking-form")?.addEventListener("submit", createBooking);
 });

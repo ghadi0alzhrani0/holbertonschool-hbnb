@@ -16,7 +16,7 @@ async function loadReviewPage() {
     return;
   }
   if (isManagementAccount()) {
-    location.href = "owner_home.html";
+    location.href = accountHome();
     return;
   }
 

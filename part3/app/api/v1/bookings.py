@@ -120,8 +120,9 @@ class BookingList(Resource):
     @jwt_required()
     def post(self):
         """Create a booking."""
-        if get_jwt().get("is_owner", False):
-            return {"error": "Owner accounts cannot create bookings"}, 403
+        claims = get_jwt()
+        if claims.get("is_owner", False) or claims.get("is_admin", False):
+            return {"error": "Management accounts cannot create bookings"}, 403
         data = (bookings_api.payload or {}).copy()
         data["user_id"] = get_jwt_identity()
         try:

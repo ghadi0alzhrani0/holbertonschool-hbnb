@@ -115,6 +115,7 @@ erDiagram
         string place_type_id FK
         string cancellation_policy_id FK
         string title
+        text image_url
         decimal price
     }
     ROOM_DETAIL {

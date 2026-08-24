@@ -49,6 +49,7 @@ def _serialize_owner_place(place):
         "id": place.id,
         "title": place.title,
         "description": place.description,
+        "image_url": place.image_url,
         "price": place.price,
         "city_id": place.city.id if place.city else None,
         "number_rooms": place.number_rooms,

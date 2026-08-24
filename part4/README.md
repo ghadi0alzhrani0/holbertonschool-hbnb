@@ -10,8 +10,9 @@ JavaScript to display places, authenticate users, and submit reviews.
 - `place.html`: displays place, host, amenity, and review details.
 - `add_review.html`: submits a review for an authenticated user.
 
-The project also includes signup, profile, booking, notification, and
-explore pages for the additional entities carried through Parts 1 to 3.
+The project also includes signup, profile, booking, notification, owner,
+and administrator pages for the additional entities carried through Parts
+1 to 3. Owners can upload a cover image while creating or editing a place.
 
 ## Run locally
 
@@ -37,11 +38,12 @@ Then open `http://127.0.0.1:8000`.
 
 The guest account can browse, book, and review places. The property owner
 opens a separate dashboard for properties, reservations, and guest activity.
+The administrator opens a site dashboard for account and activity totals.
 The notification bell appears only after login and refreshes automatically.
 
-The default API URL is `http://127.0.0.1:5000/api/v1`. It can be changed
+The default API URL is `http://127.0.0.1:5001/api/v1`. It can be changed
 from the browser console when needed:
 
 ```javascript
-localStorage.setItem("HBnB_API_BASE", "http://127.0.0.1:5000/api/v1");
+localStorage.setItem("HBnB_API_BASE", "http://127.0.0.1:5001/api/v1");
 ```

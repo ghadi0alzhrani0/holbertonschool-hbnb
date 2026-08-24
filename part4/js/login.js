@@ -32,9 +32,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       setCookie("token", data.access_token);
       const nextPage = new URLSearchParams(location.search).get("next");
-      const destination = data.role === "owner" || data.role === "admin"
-        ? "owner_home.html"
-        : (nextPage || "user_home.html");
+      const destination = data.role === "admin"
+        ? "admin_home.html"
+        : data.role === "owner" ? "owner_home.html" : (nextPage || "user_home.html");
       location.href = destination;
     } catch (error) {
       errorBox.textContent = friendlyError(error, "Sign in could not be completed.");

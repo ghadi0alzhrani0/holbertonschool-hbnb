@@ -92,7 +92,7 @@ function renderBookings() {
           <div class="glass-row"><span class="badge ${statusClass}">${safe(statusLabel(booking.status))}</span></div>
           <h3>${safe(booking.place_title || "HBnB stay")}</h3>
           <p class="booking-dates">${dateFmt(booking.start_date)} to ${dateFmt(booking.end_date)}</p>
-          ${guest ? `<p class="muted small">${safe(guest.adults_count)} adults · ${safe(guest.children_count)} children · ${safe(guest.infants_count)} infants</p>` : ""}
+          ${guest ? `<p class="muted small">${safe(guest.adults_count)} adults · ${safe(Number(guest.children_count || 0) + Number(guest.infants_count || 0))} children</p>` : ""}
           <div class="booking-total">${money(booking.total_price)}</div>
           ${bookingTimeline(booking, bookingHistoryItems)}
         </div>
@@ -142,7 +142,7 @@ async function loadBookings() {
     return;
   }
   if (isManagementAccount()) {
-    location.href = "owner_bookings.html";
+    location.href = isAdminAccount() ? "admin_home.html" : "owner_bookings.html";
     return;
   }
 

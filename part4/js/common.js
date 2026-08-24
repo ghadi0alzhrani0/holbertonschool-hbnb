@@ -61,6 +61,13 @@ function isManagementAccount() {
   return isOwnerAccount() || isAdminAccount();
 }
 
+function accountHome() {
+  if (isAdminAccount()) {
+    return "admin_home.html";
+  }
+  return isOwnerAccount() ? "owner_home.html" : "user_home.html";
+}
+
 function accountLabel() {
   if (isAdminAccount()) {
     return "Administrator";
@@ -496,17 +503,19 @@ function initNav() {
     .forEach((link) => link.remove());
 
   if (navLinks && isAuthenticated()) {
-    const links = role === "owner" || role === "admin"
-      ? [
-        ["owner_home.html", role === "admin" ? "Admin home" : "Owner home"],
-        ["manage_places.html", "Properties"],
-        ["owner_bookings.html", "Reservations"]
-      ]
-      : [
+    const links = role === "admin"
+      ? [["admin_home.html", "Dashboard"]]
+      : role === "owner"
+        ? [
+          ["owner_home.html", "Owner home"],
+          ["manage_places.html", "Properties"],
+          ["owner_bookings.html", "Reservations"]
+        ]
+        : [
         ["user_home.html", "My home"],
         ["explore.html", "Explore"],
         ["bookings.html", "Bookings"]
-      ];
+        ];
     navLinks.innerHTML = links.map(([href, label]) => `
       <a class="nav-link" data-nav="${href}" href="${href}">${label}</a>
     `).join("");

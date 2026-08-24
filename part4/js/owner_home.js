@@ -139,16 +139,15 @@ async function loadManagementHome() {
   if (!authOrLogin(location.href)) {
     return;
   }
-  if (!isManagementAccount()) {
-    location.href = "user_home.html";
+  if (!isOwnerAccount()) {
+    location.href = accountHome();
     return;
   }
   try {
     const data = await loadManagementData();
     managementProperties = data.properties;
     managementBookings = data.bookings;
-    document.getElementById("management-role").textContent = isAdminAccount()
-      ? "Administrator operations" : "Property operations";
+    document.getElementById("management-role").textContent = "Property operations";
     document.getElementById("management-name").textContent = data.name;
     document.getElementById("management-contact").textContent = data.contact;
     document.getElementById("management-property-count").textContent = data.properties.length;

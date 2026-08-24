@@ -88,6 +88,7 @@ CREATE TABLE IF NOT EXISTS places (
     id CHAR(36) PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL DEFAULT '',
+    image_url TEXT,
     price DECIMAL(10, 2) NOT NULL CHECK (price >= 0),
     latitude FLOAT NOT NULL CHECK (latitude BETWEEN -90 AND 90),
     longitude FLOAT NOT NULL CHECK (longitude BETWEEN -180 AND 180),

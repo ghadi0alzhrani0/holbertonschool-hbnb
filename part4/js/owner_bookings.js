@@ -33,7 +33,7 @@ function renderOwnerReservations() {
         <td><strong>${safe(booking.guest_name)}</strong><div class="muted small">${safe(booking.user_id.slice(0, 8))}</div></td>
         <td>${safe(booking.place_title)}</td>
         <td>${dateFmt(booking.start_date)}<br><span class="muted small">to ${dateFmt(booking.end_date)}</span></td>
-        <td>${guests ? `${safe(guests.adults_count)} ${guests.adults_count === 1 ? "adult" : "adults"}<br><span class="muted small">${safe(guests.children_count)} ${guests.children_count === 1 ? "child" : "children"} · ${safe(guests.infants_count)} ${guests.infants_count === 1 ? "infant" : "infants"}</span>` : "-"}</td>
+        <td>${guests ? `${safe(guests.adults_count)} ${guests.adults_count === 1 ? "adult" : "adults"}<br><span class="muted small">${safe(Number(guests.children_count || 0) + Number(guests.infants_count || 0))} children</span>` : "-"}</td>
         <td><span class="badge ${booking.status === "cancelled" ? "danger" : "green"}">${safe(booking.status)}</span><div>${money(booking.total_price)}</div></td>
         <td><div class="table-actions">${reservationActions(booking) || '<span class="muted small">No actions</span>'}</div></td>
       </tr>
@@ -109,13 +109,13 @@ async function loadOwnerReservations() {
   if (!authOrLogin(location.href)) {
     return;
   }
-  if (!isManagementAccount()) {
-    location.href = "bookings.html";
+  if (!isOwnerAccount()) {
+    location.href = accountHome();
     return;
   }
   try {
     const [bookings, guests, reviews] = await Promise.all([
-      isOwnerAccount() ? fetchAll("/owners/me/bookings") : fetchAll("/bookings/"),
+      fetchAll("/owners/me/bookings"),
       fetchAll("/booking-guests/"),
       fetchAll("/guest-reviews/").catch(() => [])
     ]);

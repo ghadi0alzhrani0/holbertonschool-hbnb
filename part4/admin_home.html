@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="HBnB administration dashboard.">
+  <title>Administration - HBnB</title>
+  <link rel="icon" href="images/icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Playfair+Display:wght@500;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/global.css?v=20260824a">
+  <link rel="stylesheet" href="css/portal.css?v=20260824a">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav-shell container" aria-label="Primary navigation">
+      <a class="brand" href="admin_home.html">
+        <img class="logo" src="images/logo.png" alt="HBnB logo">
+        <span class="brand-name">HBNB</span>
+      </a>
+      <div class="nav-links">
+        <a class="nav-link" data-nav="admin_home.html" href="admin_home.html">Dashboard</a>
+      </div>
+      <div class="nav-actions">
+        <a id="login-link" class="nav-action login-button" href="login.html">Sign in</a>
+        <a id="nav-profile" class="nav-action primary" href="profile.html" style="display:none">Profile</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container page">
+    <section class="portal-hero">
+      <div>
+        <div class="eyebrow">Site administration</div>
+        <h1 class="page-title">HBnB<br><em>overview.</em></h1>
+        <p class="page-subtitle">Monitor accounts, properties, reservations, and reviews.</p>
+      </div>
+      <button id="logout-btn" class="btn danger" type="button">Sign out</button>
+    </section>
+
+    <section class="admin-metric-grid section" aria-label="Site totals">
+      <div class="metric card"><span class="muted small">Guest accounts</span><strong id="admin-user-count">-</strong></div>
+      <div class="metric card"><span class="muted small">Owner accounts</span><strong id="admin-owner-count">-</strong></div>
+      <div class="metric card"><span class="muted small">Properties</span><strong id="admin-place-count">-</strong></div>
+      <div class="metric card"><span class="muted small">Reservations</span><strong id="admin-booking-count">-</strong></div>
+      <div class="metric card"><span class="muted small">Reviews</span><strong id="admin-review-count">-</strong></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head admin-users-head">
+        <div>
+          <div class="eyebrow">Account directory</div>
+          <h2 class="section-title">Users and owners</h2>
+        </div>
+        <div class="field admin-search-field">
+          <label for="admin-user-search">Search accounts</label>
+          <input id="admin-user-search" type="search" placeholder="Name or email">
+        </div>
+      </div>
+      <div class="card admin-table-shell">
+        <table class="admin-user-table">
+          <thead><tr><th>Account</th><th>Email</th><th>Type</th></tr></thead>
+          <tbody id="admin-user-list"><tr><td colspan="3">Loading accounts...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer container">© 2026 HBnB. All rights reserved.</footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="js/common.js?v=20260824a" defer></script>
+  <script src="js/admin_home.js?v=20260824a" defer></script>
+</body>
+</html>

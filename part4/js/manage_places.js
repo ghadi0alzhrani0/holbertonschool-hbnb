@@ -116,13 +116,12 @@ async function loadPropertyManager() {
   if (!authOrLogin(location.href)) {
     return;
   }
-  if (!isManagementAccount()) {
-    location.href = "user_home.html";
+  if (!isOwnerAccount()) {
+    location.href = accountHome();
     return;
   }
   try {
-    const summaries = isOwnerAccount()
-      ? await fetchAll("/owners/me/places") : await fetchPlaces();
+    const summaries = await fetchAll("/owners/me/places");
     const [details, periods, rates] = await Promise.all([
       Promise.all(summaries.map((place) => fetchPlace(place.id))),
       fetchAll("/place-availability/"),

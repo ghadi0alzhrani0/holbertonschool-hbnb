@@ -40,7 +40,7 @@ async function loadGuestHome() {
     return;
   }
   if (isManagementAccount()) {
-    location.href = "owner_home.html";
+    location.href = accountHome();
     return;
   }
 
