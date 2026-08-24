@@ -32,7 +32,7 @@ function renderPropertyManager() {
         </div>
         <div class="property-tools">
           <form class="inline-form" data-availability-place="${safe(place.id)}"><div class="field"><label>Available from</label><input name="start_date" type="date" required></div><div class="field"><label>Available until</label><input name="end_date" type="date" required></div><button class="btn" type="submit">Add availability</button></form>
-          <form class="inline-form" data-pricing-place="${safe(place.id)}"><div class="field"><label>Special from</label><input name="start_date" type="date" required></div><div class="field"><label>Special until</label><input name="end_date" type="date" required></div><div class="field"><label>Nightly rate</label><input name="special_price" type="number" min="0" step="0.01" required></div><button class="btn" type="submit">Add seasonal price</button></form>
+          <form class="inline-form" data-pricing-place="${safe(place.id)}"><div class="field"><label>Special from</label><input name="start_date" type="date" required></div><div class="field"><label>Special until</label><input name="end_date" type="date" required></div><div class="field"><label>Nightly rate</label><input name="special_price" type="number" min="1" step="0.01" required></div><button class="btn" type="submit">Add seasonal price</button></form>
         </div>
       </article>
     `;

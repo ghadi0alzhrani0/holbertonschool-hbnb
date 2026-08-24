@@ -176,7 +176,7 @@ class SeasonalPricing(BaseModel):
     __tablename__ = "seasonal_pricing"
     __table_args__ = (
         db.CheckConstraint("end_date > start_date", name="ck_pricing_dates"),
-        db.CheckConstraint("special_price >= 0", name="ck_special_price")
+        db.CheckConstraint("special_price > 0", name="ck_special_price")
     )
 
     place_id = db.Column(
@@ -203,8 +203,8 @@ class SeasonalPricing(BaseModel):
     def validate_special_price(self, key, value):
         """Validate the special nightly price."""
         value = float(value)
-        if value < 0:
-            raise ValueError("Special price must be non-negative")
+        if value <= 0:
+            raise ValueError("Special price must be greater than zero")
         return value
 
     def is_active(self, requested_date):

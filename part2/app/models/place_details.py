@@ -123,8 +123,8 @@ class SeasonalPricing(BaseModel):
         if end_date <= start_date:
             raise ValueError("End date must be after start date")
         special_price = float(special_price)
-        if special_price < 0:
-            raise ValueError("Special price must be non-negative")
+        if special_price <= 0:
+            raise ValueError("Special price must be greater than zero")
         super().__init__()
         self.place = place
         self.start_date = start_date

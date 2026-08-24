@@ -25,8 +25,8 @@ class Place(BaseModel):
         city=None,
         place_type=None,
         cancellation_policy=None,
-        number_rooms=0,
-        number_bathrooms=0,
+        number_rooms=1,
+        number_bathrooms=1,
         max_guest=1,
         business_owner=None
     ):
@@ -54,10 +54,15 @@ class Place(BaseModel):
             Owner,
             "Business owner"
         )
-        self.number_rooms = self._count(number_rooms, "Number of rooms")
+        self.number_rooms = self._count(
+            number_rooms,
+            "Number of rooms",
+            minimum=1
+        )
         self.number_bathrooms = self._count(
             number_bathrooms,
-            "Number of bathrooms"
+            "Number of bathrooms",
+            minimum=1
         )
         self.max_guest = self._count(max_guest, "Maximum guests", minimum=1)
         self.reviews = []
@@ -153,8 +158,8 @@ class Place(BaseModel):
         except (TypeError, ValueError) as exc:
             raise ValueError("Price must be a number") from exc
 
-        if price < 0:
-            raise ValueError("Price must be non-negative")
+        if price <= 0:
+            raise ValueError("Price must be greater than zero")
         self._price = price
 
     @property

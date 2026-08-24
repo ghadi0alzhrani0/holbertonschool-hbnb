@@ -80,7 +80,10 @@ function addRoomRow(room = {}) {
 }
 
 function fillSelect(id, items, placeholder) {
-  document.getElementById(id).innerHTML = `<option value="">${placeholder}</option>`
+  const placeholderOption = placeholder
+    ? `<option value="">${placeholder}</option>`
+    : "";
+  document.getElementById(id).innerHTML = placeholderOption
     + items.map((item) => `<option value="${safe(item.id)}">${safe(item.name || item.business_name)}</option>`).join("");
 }
 
@@ -140,8 +143,20 @@ async function loadPlaceEditor() {
       fetchAll("/amenities/")
     ]);
     editorAmenities = amenities;
-    fillSelect("place-type-input", types, "Choose property type");
-    fillSelect("place-policy-input", policies, "Choose policy");
+    const allowedTypes = new Set(["hotel", "villa", "apartment", "resort"]);
+    const allowedPolicies = new Set(["flexible", "moderate"]);
+    fillSelect(
+      "place-type-input",
+      types.filter((item) => (
+        allowedTypes.has(String(item.name || "").toLowerCase())
+      ))
+    );
+    fillSelect(
+      "place-policy-input",
+      policies.filter((item) => (
+        allowedPolicies.has(String(item.name || "").toLowerCase())
+      ))
+    );
     fillSelect("place-city-input", cities, "Choose city");
     renderAmenityPicker(amenities);
     addRoomRow();

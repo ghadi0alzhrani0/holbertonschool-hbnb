@@ -86,23 +86,48 @@
 
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
 }
 
 .feature {
-  padding: 16px;
+  display: grid;
+  align-content: center;
+  min-height: 82px;
+  padding: 18px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: rgba(255, 255, 255, .55);
+  background: rgba(255, 253, 249, .88);
+  box-shadow: 0 12px 32px rgba(93, 48, 14, .07);
+}
+
+.amenity-feature {
+  position: relative;
+  padding-left: 48px;
+}
+
+.amenity-feature::before {
+  content: "";
+  position: absolute;
+  left: 18px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 0 7px rgba(210, 69, 88, .1);
 }
 
 .review-card {
-  margin: 20px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, .55);
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  height: 100%;
+  margin: 0;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 253, 249, .9);
+  box-shadow: 0 14px 38px rgba(93, 48, 14, .08);
 }
 
 .review-head {
@@ -113,6 +138,7 @@
 
 .review-rating {
   color: var(--red);
+  font-weight: 900;
 }
 
 .place-info {
@@ -181,6 +207,37 @@
   margin-top: 8px;
 }
 
+.detail-card {
+  min-height: 118px;
+  border-radius: 8px;
+  background: rgba(255, 253, 249, .9);
+  box-shadow: 0 14px 38px rgba(93, 48, 14, .08);
+}
+
+.room-card strong,
+.rate-card strong {
+  display: block;
+  color: var(--brown);
+  font-size: 1rem;
+}
+
+.availability-card {
+  min-height: 96px;
+}
+
+.availability-row {
+  height: 100%;
+  flex-wrap: nowrap;
+}
+
+.review-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
 @media (max-width: 980px) {
   .place-layout {
     grid-template-columns: 1fr;
@@ -217,6 +274,10 @@
 
   .feature-grid {
     grid-template-columns: 1fr;
+  }
+
+  .review-actions .btn {
+    width: 100%;
   }
 
 }

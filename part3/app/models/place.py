@@ -32,7 +32,7 @@ class Place(BaseModel):
 
     __tablename__ = "places"
     __table_args__ = (
-        db.CheckConstraint("price >= 0", name="ck_place_price"),
+        db.CheckConstraint("price > 0", name="ck_place_price"),
         db.CheckConstraint(
             "latitude BETWEEN -90 AND 90",
             name="ck_place_latitude"
@@ -41,9 +41,9 @@ class Place(BaseModel):
             "longitude BETWEEN -180 AND 180",
             name="ck_place_longitude"
         ),
-        db.CheckConstraint("number_rooms >= 0", name="ck_place_rooms"),
+        db.CheckConstraint("number_rooms >= 1", name="ck_place_rooms"),
         db.CheckConstraint(
-            "number_bathrooms >= 0",
+            "number_bathrooms >= 1",
             name="ck_place_bathrooms"
         ),
         db.CheckConstraint("max_guest >= 1", name="ck_place_guests")
@@ -80,8 +80,8 @@ class Place(BaseModel):
         db.ForeignKey("cancellation_policies.id"),
         nullable=True
     )
-    number_rooms = db.Column(db.Integer, default=0, nullable=False)
-    number_bathrooms = db.Column(db.Integer, default=0, nullable=False)
+    number_rooms = db.Column(db.Integer, default=1, nullable=False)
+    number_bathrooms = db.Column(db.Integer, default=1, nullable=False)
     max_guest = db.Column(db.Integer, default=1, nullable=False)
 
     owner = db.relationship("User", back_populates="places")
@@ -134,8 +134,8 @@ class Place(BaseModel):
         city=None,
         place_type=None,
         cancellation_policy=None,
-        number_rooms=0,
-        number_bathrooms=0,
+        number_rooms=1,
+        number_bathrooms=1,
         max_guest=1,
         business_owner=None,
         image_url=None
@@ -214,8 +214,8 @@ class Place(BaseModel):
         except (TypeError, ValueError) as exc:
             raise ValueError("Price must be a number") from exc
 
-        if price < 0:
-            raise ValueError("Price must be non-negative")
+        if price <= 0:
+            raise ValueError("Price must be greater than zero")
         return price
 
     @validates("latitude")
@@ -247,9 +247,8 @@ class Place(BaseModel):
         """Validate place count fields."""
         if not isinstance(value, int) or isinstance(value, bool):
             raise ValueError("Place counts must be integers")
-        minimum = 1 if key == "max_guest" else 0
-        if value < minimum:
-            raise ValueError(f"{key} must be at least {minimum}")
+        if value < 1:
+            raise ValueError(f"{key} must be at least 1")
         return value
 
     def add_review(self, review):

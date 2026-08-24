@@ -15,19 +15,10 @@ async function loadPlacePage() {
     return;
   }
 
-  const reviewLinks = [
-    document.getElementById("review-link"),
-    document.getElementById("review-link-secondary")
-  ];
-  reviewLinks.forEach((link) => {
-    if (!link) {
-      return;
-    }
-    link.href = `add_review.html?place_id=${encodeURIComponent(placeId)}`;
-    link.classList.toggle(
-      "hidden", !isAuthenticated() || isManagementAccount()
-    );
-  });
+  const reviewLink = document.getElementById("review-link");
+  reviewLink.href = isAuthenticated() && !isManagementAccount()
+    ? `add_review.html?place_id=${encodeURIComponent(placeId)}`
+    : "login.html";
 
   if (isManagementAccount()) {
     const bookingForm = document.getElementById("booking-form");
@@ -101,7 +92,7 @@ function displayPlaceDetails(currentPlace) {
   const amenities = currentPlace.amenities || [];
   document.getElementById("amenities").innerHTML = amenities.length
     ? amenities.map((amenity) => `
-      <div class="feature">
+      <div class="feature amenity-feature">
         <strong>${safe(amenity.name)}</strong>
       </div>
     `).join("")
@@ -168,7 +159,7 @@ async function loadExtendedDetails(placeId) {
 
   document.getElementById("room-details").innerHTML = roomList.length
     ? roomList.map((room) => `
-      <article class="card pad">
+      <article class="card pad detail-card room-card">
         <strong>${safe(room.room_name)}</strong>
         <div class="muted small room-note">
           ${safe(room.bed_type)} - ${safe(room.beds_count)} bed(s)
@@ -183,7 +174,7 @@ async function loadExtendedDetails(placeId) {
 
   document.getElementById("availability").innerHTML = availability.length
     ? availability.map((period) => `
-      <article class="card pad">
+      <article class="card pad detail-card availability-card">
         <div class="glass-row availability-row">
           <strong>${dateFmt(period.start_date)} to ${dateFmt(period.end_date)}</strong>
           <span class="badge ${period.is_booked ? "danger" : "green"}">
@@ -200,7 +191,7 @@ async function loadExtendedDetails(placeId) {
 
   document.getElementById("seasonal-pricing").innerHTML = pricing.length
     ? pricing.map((rate) => `
-      <article class="card pad">
+      <article class="card pad detail-card rate-card">
         <div class="eyebrow">Seasonal pricing</div>
         <strong>${money(rate.special_price)} / night</strong>
         <div class="muted small rate-note">
