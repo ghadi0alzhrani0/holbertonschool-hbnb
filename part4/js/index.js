@@ -13,8 +13,6 @@ function fillCitySelects(cityList) {
     .join("");
   document.getElementById("hero-destination").innerHTML =
     `<option value="all">Anywhere</option>${options}`;
-  document.getElementById("home-city").innerHTML =
-    `<option value="all">All destinations</option>${options}`;
 }
 
 function updateGuestCount(step) {
@@ -85,7 +83,7 @@ function stayCard(place, index) {
         <div class="place-meta">
           <span>${safe(placeLocation(place))}</span>
           <span class="place-card-rating" aria-label="${rating.value ? `${rating.label} out of 5` : "New listing"}">
-            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m12 2.8 2.8 5.7 6.3.9-4.6 4.5 1.1 6.3-5.6-3-5.6 3 1.1-6.3-4.6-4.5 6.3-.9L12 2.8Z"></path></svg>
+            ${lineIcon("heart")}
             ${rating.label}
           </span>
         </div>
@@ -101,19 +99,12 @@ function stayCard(place, index) {
 
 function displayPlaces() {
   const listElement = document.getElementById("places-list");
-  const priceFilter = document.getElementById("price-filter").value;
-  const cityFilter = document.getElementById("home-city").value;
-  const filteredPlaces = places.filter((place) => (
-    (priceFilter === "all" || Number(place.price) <= Number(priceFilter))
-    && (cityFilter === "all" || place.city_id === cityFilter)
-  ));
-
-  listElement.innerHTML = filteredPlaces.length
-    ? filteredPlaces.map(stayCard).join("")
+  listElement.innerHTML = places.length
+    ? places.map(stayCard).join("")
     : emptyState({
-      icon: "search",
-      title: "No stays match these filters",
-      text: "Try another destination or increase your maximum price.",
+      icon: "compass",
+      title: "New stays are on the way",
+      text: "Explore again soon for fresh destinations and memorable stays.",
       actionHref: "explore.html",
       actionLabel: "Explore all stays"
     });
@@ -175,8 +166,6 @@ async function loadIndex() {
   document.getElementById("home-search")?.addEventListener("submit", submitHomeSearch);
   document.getElementById("guest-minus")?.addEventListener("click", () => updateGuestCount(-1));
   document.getElementById("guest-plus")?.addEventListener("click", () => updateGuestCount(1));
-  document.getElementById("price-filter")?.addEventListener("change", displayPlaces);
-  document.getElementById("home-city")?.addEventListener("change", displayPlaces);
   document.getElementById("spot-prev")?.addEventListener("click", () => moveSpotlight(-1));
   document.getElementById("spot-next")?.addEventListener("click", () => moveSpotlight(1));
   setupDateFields();

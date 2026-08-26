@@ -72,19 +72,19 @@ async function loadReviewPage() {
 }
 
 function renderOverallRating() {
-  const stars = document.getElementById("overall-stars");
-  stars.innerHTML = [1, 2, 3, 4, 5]
-    .map((value) => `<button class="star" type="button" data-value="${value}">★</button>`)
+  const hearts = document.getElementById("overall-hearts");
+  hearts.innerHTML = [1, 2, 3, 4, 5]
+    .map((value) => `<button class="heart-rating" type="button" data-value="${value}" aria-label="${value} out of 5">♥</button>`)
     .join("");
 
-  stars.addEventListener("click", (event) => {
+  hearts.addEventListener("click", (event) => {
     const button = event.target.closest("button");
     if (!button) {
       return;
     }
     overallRating = Number(button.dataset.value);
-    stars.querySelectorAll("button").forEach((star, index) => {
-      star.classList.toggle("active", index < overallRating);
+    hearts.querySelectorAll("button").forEach((heart, index) => {
+      heart.classList.toggle("active", index < overallRating);
     });
   });
 }
@@ -94,15 +94,15 @@ function renderDetailedRatings() {
   ratingGrid.innerHTML = ratingKeys.map((key) => `
     <div class="rating-item">
       <strong>${key.replace("_", " ")}</strong>
-      <div class="rating-stars" data-key="${key}">
+      <div class="rating-hearts" data-key="${key}">
         ${[1, 2, 3, 4, 5]
-          .map((value) => `<button type="button" data-value="${value}">★</button>`)
+          .map((value) => `<button type="button" data-value="${value}" aria-label="${value} out of 5">♥</button>`)
           .join("")}
       </div>
     </div>
   `).join("");
 
-  ratingGrid.querySelectorAll(".rating-stars").forEach((row) => {
+  ratingGrid.querySelectorAll(".rating-hearts").forEach((row) => {
     row.addEventListener("click", (event) => {
       const button = event.target.closest("button");
       if (!button) {
@@ -110,8 +110,8 @@ function renderDetailedRatings() {
       }
       const value = Number(button.dataset.value);
       detailedRatings[row.dataset.key] = value;
-      row.querySelectorAll("button").forEach((star, index) => {
-        star.classList.toggle("active", index < value);
+      row.querySelectorAll("button").forEach((heart, index) => {
+        heart.classList.toggle("active", index < value);
       });
     });
   });
@@ -127,8 +127,8 @@ function clearReviewForm(form) {
   overallRating = 0;
   detailedRatings = {};
   document.getElementById("review-counter").textContent = "0 / 1200";
-  document.querySelectorAll(".star, .rating-stars button").forEach((star) => {
-    star.classList.remove("active");
+  document.querySelectorAll(".heart-rating, .rating-hearts button").forEach((heart) => {
+    heart.classList.remove("active");
   });
 }
 

@@ -23,7 +23,7 @@ function guestRecommendationCard(place, index, cities, reviews) {
       <div class="place-body">
         <div class="place-meta">
           <span>${safe(cities.get(place.city_id) || "Saudi Arabia")}</span>
-          <span class="place-card-rating">${lineIcon("star")} ${rating.label}</span>
+          <span class="place-card-rating">${lineIcon("heart")} ${rating.label}</span>
         </div>
         <h3 class="place-title">${safe(place.title)}</h3>
         <div class="glass-row place-card-actions">

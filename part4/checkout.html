@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Playfair+Display:wght@500;600;700&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/global.css?v=20260822c">
+  <link rel="stylesheet" href="css/global.css?v=20260825b">
   <link rel="stylesheet" href="css/portal.css?v=20260822c">
 </head>
 <body>
@@ -19,7 +19,7 @@
     <div id="checkout-loading" class="empty-state">Loading booking details...</div>
     <section id="checkout-view" class="checkout-layout section hidden">
       <form id="checkout-form" class="form">
-        <section><div class="eyebrow">Stay details</div><h2 class="section-title">Dates and guests</h2><div class="form-grid"><div class="field"><label for="checkout-start">Check in</label><input id="checkout-start" type="date" required></div><div class="field"><label for="checkout-end">Check out</label><input id="checkout-end" type="date" required></div></div><div class="form-grid"><div class="field"><label for="checkout-adults">Adults</label><input id="checkout-adults" type="number" min="1" required></div><div class="field"><label for="checkout-children">Children</label><input id="checkout-children" type="number" min="0"></div></div></section>
+        <section><div class="eyebrow">Stay details</div><h2 class="section-title">Dates and guests</h2><div class="form-grid"><div class="field"><label for="checkout-start">Check in</label><input id="checkout-start" type="date" required></div><div class="field"><label for="checkout-end">Check out</label><input id="checkout-end" type="date" required></div></div><div class="form-grid"><div class="field"><label for="checkout-adults">Adults</label><input id="checkout-adults" type="number" min="1" step="1" required></div><div class="field"><label for="checkout-children">Children</label><input id="checkout-children" type="number" min="0" step="1"></div></div></section>
         <section class="section"><div class="eyebrow">Policy</div><h2 id="checkout-policy-name" class="section-title">Cancellation policy</h2><p id="checkout-policy-text" class="page-subtitle"></p></section>
         <div id="checkout-error" class="error-box"></div>
         <div class="form-footer"><a id="checkout-back" class="btn" href="explore.html">Back to place</a><button id="checkout-submit" class="btn primary" type="submit">Confirm booking</button></div>
@@ -33,7 +33,7 @@
   </main>
   <footer class="site-footer container">© 2026 HBnB. All rights reserved.</footer>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="js/common.js?v=20260822c" defer></script>
-  <script src="js/checkout.js" defer></script>
+  <script src="js/common.js?v=20260826a" defer></script>
+  <script src="js/checkout.js?v=20260826a" defer></script>
 </body>
 </html>

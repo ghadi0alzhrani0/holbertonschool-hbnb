@@ -52,17 +52,31 @@ class ReviewList(Resource):
     @api.response(400, "Invalid input data")
     def post(self):
         """Register a new review."""
-        if get_jwt().get("is_owner", False):
+        claims = get_jwt()
+        if claims.get("is_admin", False):
+            return {"error": "Administrators can only moderate reviews"}, 403
+        if claims.get("is_owner", False):
             return {"error": "Owner accounts cannot review places"}, 403
         data = (api.payload or {}).copy()
         user_id = get_jwt_identity()
         place = facade.get_place(data.get("place_id"))
-        is_admin = get_jwt().get("is_admin", False)
 
         if not place:
             return {"error": "Place not found"}, 400
-        if not is_admin and place.owner.id == user_id:
+        if place.owner.id == user_id:
             return {"error": "You cannot review your own place"}, 400
+        user = facade.get_user(user_id)
+        completed_stay = user and any(
+            booking.place.id == place.id and booking.status == "completed"
+            for booking in user.bookings
+        )
+        if not completed_stay:
+            return {
+                "error": (
+                    "A completed booking is required before reviewing this "
+                    "place"
+                )
+            }, 400
         if facade.get_review_by_user_and_place(user_id, place.id):
             return {"error": "You have already reviewed this place"}, 400
 
@@ -76,11 +90,18 @@ class ReviewList(Resource):
             facade.create_notification({
                 "notification_type": "new_review",
                 "content": (
-                    f"A new {review.rating}-star review was added to "
+                    f"A new {review.rating}-heart review was added to "
                     f"{place.title}."
                 ),
                 "owner_id": place.business_owner.id
             })
+        facade.notify_administrators(
+            "review_added",
+            (
+                f"{review.user.first_name} added a {review.rating}-heart "
+                f"review to {place.title}."
+            )
+        )
 
         return serialize_review(review), 201
 
@@ -119,8 +140,9 @@ class ReviewResource(Resource):
         review = facade.get_review(review_id)
         if not review:
             return {"error": "Review not found"}, 404
-        is_admin = get_jwt().get("is_admin", False)
-        if not is_admin and review.user.id != get_jwt_identity():
+        if get_jwt().get("is_admin", False):
+            return {"error": "Administrators can only moderate reviews"}, 403
+        if review.user.id != get_jwt_identity():
             return {"error": "Unauthorized action"}, 403
 
         try:
@@ -143,6 +165,18 @@ class ReviewResource(Resource):
         if not is_admin and review.user.id != get_jwt_identity():
             return {"error": "Unauthorized action"}, 403
 
+        reviewer_id = review.user.id
+        place_title = review.place.title
         facade.delete_review(review_id)
+
+        if is_admin and reviewer_id != get_jwt_identity():
+            facade.create_notification({
+                "notification_type": "review_moderation",
+                "content": (
+                    f"Your review for {place_title} was removed by site "
+                    "moderation."
+                ),
+                "user_id": reviewer_id
+            })
 
         return {"message": "Review deleted successfully"}, 200

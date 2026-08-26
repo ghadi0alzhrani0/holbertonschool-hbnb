@@ -104,13 +104,13 @@ async function renderManagementReviews() {
     const place = managementProperties.find((item) => item.id === review.place_id);
     return `
       <article class="review-card">
-        <div class="review-head"><strong>${safe(place?.title || "Property")}</strong><span class="review-rating">${safe(review.rating)} / 5</span></div>
+        <div class="review-head"><strong>${safe(place?.title || "Property")}</strong><span class="review-rating">${lineIcon("heart")} ${safe(review.rating)} / 5</span></div>
         <p class="place-info">${safe(review.text)}</p>
         ${response ? `<div class="muted small"><strong>Response:</strong> ${safe(response.response_text)}</div>` : `<form class="form review-response-form" data-response-review="${safe(review.id)}" data-response-owner="${safe(place?.business_owner_id || "")}"><div class="field"><label>Reply to guest</label><textarea required></textarea></div><button class="btn primary review-response-button" type="submit">Publish response</button></form>`}
       </article>
     `;
   }).join("") || emptyState({
-    icon: "star",
+    icon: "heart",
     title: "No guest reviews yet",
     text: "Reviews and your responses will appear here after completed stays."
   });

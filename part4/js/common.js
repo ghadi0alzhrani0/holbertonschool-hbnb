@@ -153,7 +153,6 @@ function lineIcon(name, className = "") {
     heart: '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5a5.5 5.5 0 0 0 1-8.9Z"></path>',
     lock: '<rect x="4" y="10" width="16" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path>',
     search: '<circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path>',
-    star: '<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z"></path>',
     suitcase: '<rect x="3" y="7" width="18" height="13" rx="2"></rect><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18"></path>'
   };
   return `<svg class="line-icon ${safe(className)}" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${paths[name] || paths.compass}</svg>`;
@@ -467,6 +466,12 @@ function initNotificationCenter() {
   const popover = document.getElementById("notification-popover");
   bell.addEventListener("click", (event) => {
     event.stopPropagation();
+    const accountMenu = document.getElementById("account-menu");
+    const profileButton = document.getElementById("nav-profile");
+    if (accountMenu) {
+      accountMenu.hidden = true;
+      profileButton?.setAttribute("aria-expanded", "false");
+    }
     const opening = popover.classList.contains("hidden");
     popover.classList.toggle("hidden", !opening);
     bell.setAttribute("aria-expanded", String(opening));
@@ -490,6 +495,73 @@ function initNotificationCenter() {
   notificationTimer = setInterval(refreshNotificationCenter, 8000);
   window.addEventListener("focus", () => refreshNotificationCenter(true));
   window.addEventListener("pagehide", () => clearInterval(notificationTimer));
+}
+
+function initProfileMenu() {
+  let button = document.getElementById("nav-profile");
+  const navActions = button?.closest(".nav-actions");
+  if (!button || !navActions || !isAuthenticated()) {
+    return;
+  }
+
+  if (button.tagName !== "BUTTON") {
+    const replacement = document.createElement("button");
+    replacement.id = button.id;
+    replacement.className = button.className;
+    replacement.type = "button";
+    replacement.textContent = "Profile";
+    replacement.style.cssText = button.style.cssText;
+    button.replaceWith(replacement);
+    button = replacement;
+  }
+  button.classList.add("profile-trigger");
+  button.setAttribute("aria-haspopup", "menu");
+  button.setAttribute("aria-expanded", "false");
+
+  let menu = document.getElementById("account-menu");
+  if (!menu) {
+    menu = document.createElement("div");
+    menu.id = "account-menu";
+    menu.className = "account-menu";
+    menu.setAttribute("role", "menu");
+    menu.hidden = true;
+    menu.innerHTML = `
+      <a role="menuitem" href="${accountHome()}">${accountLabel()} home</a>
+      <a role="menuitem" href="profile.html">Profile settings</a>
+      <button id="nav-logout-btn" class="account-menu-danger" type="button"
+        role="menuitem">Sign out</button>
+    `;
+    navActions.appendChild(menu);
+  }
+
+  const closeMenu = () => {
+    menu.hidden = true;
+    button.setAttribute("aria-expanded", "false");
+  };
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const notificationPopover = document.getElementById("notification-popover");
+    const notificationBell = document.getElementById("notification-bell");
+    notificationPopover?.classList.add("hidden");
+    notificationBell?.setAttribute("aria-expanded", "false");
+    const opening = menu.hidden;
+    menu.hidden = !opening;
+    button.setAttribute("aria-expanded", String(opening));
+  });
+  menu.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (event.target.closest('[role="menuitem"]')) {
+      closeMenu();
+    }
+  });
+  document.addEventListener("click", closeMenu);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !menu.hidden) {
+      closeMenu();
+      button.focus();
+    }
+  });
+  document.getElementById("nav-logout-btn")?.addEventListener("click", logout);
 }
 
 function initNav() {
@@ -536,6 +608,7 @@ function initNav() {
 
   document.getElementById("logout-btn")?.addEventListener("click", logout);
   initNotificationCenter();
+  initProfileMenu();
 }
 
 async function fetchPlaces() {
@@ -564,6 +637,28 @@ async function fetchReviewsWithDetails() {
   return (await Promise.all(reviews.map((review) => (
     api(`/reviews/${encodeURIComponent(review.id)}`).catch(() => null)
   )))).filter(Boolean);
+}
+
+function syncGuestCapacity(adultsInput, childrenInput, maxGuests, changedField) {
+  const capacity = Math.max(1, Math.floor(Number(maxGuests) || 1));
+  let adults = Math.max(1, Math.floor(Number(adultsInput.value) || 1));
+  let children = Math.max(0, Math.floor(Number(childrenInput.value) || 0));
+
+  if (changedField === "children") {
+    children = Math.min(children, capacity - 1);
+    adults = Math.min(adults, capacity - children);
+  } else {
+    adults = Math.min(adults, capacity);
+    children = Math.min(children, capacity - adults);
+  }
+
+  adultsInput.min = "1";
+  adultsInput.max = String(Math.max(1, capacity - children));
+  adultsInput.value = String(adults);
+  childrenInput.min = "0";
+  childrenInput.max = String(Math.max(0, capacity - adults));
+  childrenInput.value = String(children);
+  return { adults, children, total: adults + children, capacity };
 }
 
 document.addEventListener("DOMContentLoaded", initNav);

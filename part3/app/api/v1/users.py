@@ -32,7 +32,8 @@ def serialize_user(user):
         "first_name": user.first_name,
         "last_name": user.last_name,
         "email": user.email,
-        "is_admin": user.is_admin
+        "is_admin": user.is_admin,
+        "place_count": len(user.places)
     }
 
 
@@ -112,3 +113,18 @@ class UserResource(Resource):
             return {"error": "User not found"}, 404
 
         return serialize_user(user), 200
+
+    @jwt_required()
+    @api.response(200, "User deleted successfully")
+    @api.response(403, "Admin privileges required")
+    def delete(self, user_id):
+        """Delete a guest account as an administrator."""
+        if not get_jwt().get("is_admin", False):
+            return {"error": "Admin privileges required"}, 403
+        try:
+            deleted = facade.delete_user(user_id)
+        except ValueError as exc:
+            return {"error": str(exc)}, 400
+        if not deleted:
+            return {"error": "User not found"}, 404
+        return {"message": "User deleted successfully"}, 200

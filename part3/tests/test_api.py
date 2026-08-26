@@ -87,7 +87,16 @@ class TestHBnBPart3(unittest.TestCase):
         return response.get_json()
 
     def create_review(self, headers, place_id):
-        """Create a review through the protected endpoint."""
+        """Complete a stay and create its review through the API."""
+        reviewer = facade.get_user_by_email("reviewer@example.com")
+        booking = facade.create_booking({
+            "place_id": place_id,
+            "user_id": reviewer.id,
+            "start_date": "2027-02-02",
+            "end_date": "2027-02-04"
+        })
+        for status in ("confirmed", "checked_in", "completed"):
+            facade.update_booking_status(booking.id, status)
         response = self.client.post(
             "/api/v1/reviews/",
             json={
@@ -396,8 +405,8 @@ class TestHBnBPart3(unittest.TestCase):
             "You have already reviewed this place"
         )
 
-    def test_only_author_or_admin_can_modify_review(self):
-        """Review changes require authorship or admin privileges."""
+    def test_only_author_can_modify_review(self):
+        """Review edits belong to the author; admins moderate by deletion."""
         self.create_user()
         place = self.create_place(self.login())
         self.create_user(
@@ -422,10 +431,17 @@ class TestHBnBPart3(unittest.TestCase):
             json={"text": "Admin change"},
             headers=self.create_admin()
         )
+        self.assertEqual(response.status_code, 403)
+
+        response = self.client.put(
+            f"/api/v1/reviews/{review['id']}",
+            json={"text": "Updated by the author"},
+            headers=reviewer_headers
+        )
         self.assertEqual(response.status_code, 200)
         updated = response.get_json()
         self.assertEqual(updated["id"], review["id"])
-        self.assertEqual(updated["text"], "Admin change")
+        self.assertEqual(updated["text"], "Updated by the author")
         self.assertNotEqual(updated["updated_at"], review["updated_at"])
 
         response = self.client.delete(

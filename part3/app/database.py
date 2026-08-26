@@ -8,6 +8,9 @@ from pathlib import Path
 from app import db
 
 
+DEVELOPMENT_SEED_VERSION = 2
+
+
 def initialize_database(app):
     """Create mapped tables and load the SQLite development seed."""
     with app.app_context():
@@ -26,4 +29,24 @@ def initialize_database(app):
             raise RuntimeError(f"Database seed file not found: {seed_path}")
 
         with closing(sqlite3.connect(database_name)) as connection:
+            connection.execute(
+                """
+                CREATE TABLE IF NOT EXISTS development_seed_versions (
+                    version INTEGER PRIMARY KEY,
+                    applied_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                )
+                """
+            )
+            applied = connection.execute(
+                "SELECT 1 FROM development_seed_versions WHERE version = ?",
+                (DEVELOPMENT_SEED_VERSION,)
+            ).fetchone()
+            if applied is not None:
+                return
+
             connection.executescript(seed_path.read_text(encoding="utf-8"))
+            connection.execute(
+                "INSERT INTO development_seed_versions (version) VALUES (?)",
+                (DEVELOPMENT_SEED_VERSION,)
+            )
+            connection.commit()

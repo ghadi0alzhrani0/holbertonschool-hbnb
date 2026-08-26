@@ -37,22 +37,6 @@
   position: relative;
 }
 
-#nav-profile::after {
-  width: 7px;
-  height: 7px;
-  margin: -3px 1px 0 5px;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
-  content: "";
-  transform: rotate(45deg);
-  transition: transform .2s ease;
-}
-
-#nav-profile[aria-expanded="true"]::after {
-  margin-top: 3px;
-  transform: rotate(225deg);
-}
-
 .account-menu {
   position: absolute;
   z-index: 30;
@@ -70,7 +54,9 @@
   display: none;
 }
 
-.account-menu button {
+.account-menu button,
+.account-menu a {
+  display: block;
   width: 100%;
   padding: 11px 12px;
   border: 0;
@@ -83,6 +69,7 @@
 }
 
 .account-menu button:hover,
+.account-menu a:hover,
 .account-menu button.active {
   background: rgba(210, 65, 82, .1);
   color: var(--red);

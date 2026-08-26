@@ -163,6 +163,17 @@ class HBnBFacade:
 
         return self.user_repo.update(user_id, data)
 
+    def delete_user(self, user_id):
+        """Delete a guest account while protecting administrators and hosts."""
+        user = self.get_user(user_id)
+        if user is None:
+            return False
+        if user.is_admin:
+            raise ValueError("Administrator accounts cannot be deleted")
+        if user.places:
+            raise ValueError("Host records with properties cannot be deleted")
+        return self.user_repo.delete(user_id) is not None
+
     def create_amenity(self, amenity_data):
         """Create and store a new amenity."""
         data = amenity_data.copy()
@@ -404,6 +415,15 @@ class HBnBFacade:
             raise ValueError("Commercial register already registered")
         return self._store(self.owner_repo, Owner(**owner_data))
 
+    def delete_owner(self, owner_id):
+        """Delete an owner account and the properties it manages."""
+        owner = self.owner_repo.get(owner_id)
+        if owner is None:
+            return False
+        for place in list(owner.places):
+            self.delete_place(place.id)
+        return self.owner_repo.delete(owner_id) is not None
+
     def create_country(self, country_data):
         """Create a country."""
         name = country_data.get("name")
@@ -543,8 +563,54 @@ class HBnBFacade:
         )
         if booking.guest_details is not None:
             raise ValueError("Booking guest details already exist")
+        self._validate_booking_guest_capacity(booking, data)
         details = BookingGuest(booking=booking, **data)
         return self._store(self.booking_guest_repo, details)
+
+    def update_booking_guest(self, details_id, guest_data):
+        """Update guest counts without exceeding the place limit."""
+        details = self.booking_guest_repo.get(details_id)
+        if details is None:
+            return None
+        data = guest_data.copy()
+        allowed = self.EXTENDED_UPDATE_FIELDS["booking_guests"]
+        unknown = set(data) - allowed
+        if unknown:
+            raise ValueError(f"Unsupported field: {sorted(unknown)[0]}")
+        self._validate_booking_guest_capacity(details.booking, data, details)
+        return self.booking_guest_repo.update(details_id, data)
+
+    @staticmethod
+    def _validate_booking_guest_capacity(booking, data, current=None):
+        """Validate non-negative guest counts against a place's capacity."""
+        values = {
+            "adults_count": data.get(
+                "adults_count",
+                current.adults_count if current is not None else None
+            ),
+            "children_count": data.get(
+                "children_count",
+                current.children_count if current is not None else 0
+            ),
+            "infants_count": data.get(
+                "infants_count",
+                current.infants_count if current is not None else 0
+            )
+        }
+        if values["adults_count"] is None:
+            raise ValueError("At least one adult is required")
+        if any(isinstance(value, bool) or not isinstance(value, int)
+               for value in values.values()):
+            raise ValueError("Guest counts must be whole numbers")
+        if values["adults_count"] < 1:
+            raise ValueError("At least one adult is required")
+        if values["children_count"] < 0 or values["infants_count"] < 0:
+            raise ValueError("Guest counts cannot be negative")
+        total = sum(values.values())
+        if total > booking.place.max_guest:
+            raise ValueError(
+                f"This place allows up to {booking.place.max_guest} guests"
+            )
 
     def update_booking_status(self, booking_id, status):
         """Apply a supported booking status transition."""
@@ -641,6 +707,18 @@ class HBnBFacade:
             **data
         )
         return self._store(self.notification_repo, notification)
+
+    def notify_administrators(self, notification_type, content):
+        """Create one private notification for every administrator."""
+        return [
+            self.create_notification({
+                "notification_type": notification_type,
+                "content": content,
+                "user_id": user.id
+            })
+            for user in self.get_all_users()
+            if user.is_admin
+        ]
 
     def get_extended_resource(self, resource, object_id):
         """Retrieve one extended entity through its repository."""

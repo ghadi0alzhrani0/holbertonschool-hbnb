@@ -62,7 +62,7 @@ function exploreCard(place, index) {
         <div class="place-meta">
           <span>${safe(exploreLocation(place))}</span>
           <span class="place-rating" aria-label="${rating.value ? `${rating.label} out of 5` : "New listing"}">
-            ${lineIcon("star")} ${rating.label}
+            ${lineIcon("heart")} ${rating.label}
           </span>
         </div>
         <h3 class="place-title">${safe(place.title || "Stay")}</h3>

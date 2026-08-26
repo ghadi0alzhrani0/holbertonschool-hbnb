@@ -33,8 +33,11 @@ Then open `http://127.0.0.1:8000`.
 ## Demo accounts
 
 - Guest: `guest@hbnb.io` / `guest1234`
+- Guest: `layan@hbnb.io` / `Layan@2026`
+- Guest: `hessa@hbnb.io` / `Hessa@2026`
 - Property owner: `owner@hbnb.io` / `owner1234`
 - Administrator: `admin@hbnb.io` / `admin1234`
+- Seed host record: `host@hbnb.io` / `host1234`
 
 The guest account can browse, book, and review places. The property owner
 opens a separate dashboard for properties, reservations, and guest activity.

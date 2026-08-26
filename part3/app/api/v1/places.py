@@ -242,6 +242,15 @@ class PlaceList(Resource):
         except ValueError as exc:
             return {"error": str(exc)}, 400
 
+        if claims.get("is_owner", False):
+            facade.notify_administrators(
+                "property_added",
+                (
+                    f"{place.business_owner.business_name} added "
+                    f"{place.title}."
+                )
+            )
+
         return serialize_place_creation(place), 201
 
     @api.response(200, "List of places retrieved successfully")

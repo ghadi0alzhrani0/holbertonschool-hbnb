@@ -25,14 +25,17 @@ function updateCheckoutSummary() {
   if (!checkoutPlace) {
     return;
   }
+  const guestCounts = syncGuestCapacity(
+    document.getElementById("checkout-adults"),
+    document.getElementById("checkout-children"),
+    checkoutPlace.max_guest
+  );
   const start = document.getElementById("checkout-start").value;
   const end = document.getElementById("checkout-end").value;
-  const adults = Number(document.getElementById("checkout-adults").value || 0);
-  const children = Number(document.getElementById("checkout-children").value || 0);
   const nights = start && end && end > start ? checkoutNights(start, end) : 0;
   document.getElementById("checkout-rate").textContent = money(checkoutPlace.price);
   document.getElementById("checkout-nights").textContent = nights;
-  document.getElementById("checkout-guests").textContent = adults + children;
+  document.getElementById("checkout-guests").textContent = guestCounts.total;
   document.getElementById("checkout-total").textContent = nights
     ? money(checkoutEstimate(start, end)) : "SAR -";
 }
@@ -72,6 +75,11 @@ async function loadCheckout() {
     document.getElementById("checkout-end").value = qs("end_date") || "";
     document.getElementById("checkout-adults").value = qs("adults") || 2;
     document.getElementById("checkout-children").value = qs("children") || 0;
+    syncGuestCapacity(
+      document.getElementById("checkout-adults"),
+      document.getElementById("checkout-children"),
+      place.max_guest
+    );
     const policy = place.cancellation_policy_id
       ? await api(`/cancellation-policies/${encodeURIComponent(place.cancellation_policy_id)}`).catch(() => null)
       : null;
@@ -128,8 +136,7 @@ async function submitCheckout(event) {
       body: JSON.stringify({
         booking_id: booking.id,
         adults_count: adults,
-        children_count: children,
-        infants_count: 0
+        children_count: children
       })
     });
     location.href = `bookings.html?created=${encodeURIComponent(booking.id)}`;
@@ -145,6 +152,29 @@ async function submitCheckout(event) {
 document.addEventListener("DOMContentLoaded", () => {
   loadCheckout();
   document.getElementById("checkout-form")?.addEventListener("submit", submitCheckout);
-  ["checkout-start", "checkout-end", "checkout-adults", "checkout-children"]
-    .forEach((id) => document.getElementById(id)?.addEventListener("input", updateCheckoutSummary));
+  ["checkout-start", "checkout-end"].forEach((id) => (
+    document.getElementById(id)?.addEventListener("input", updateCheckoutSummary)
+  ));
+  document.getElementById("checkout-adults")?.addEventListener("input", () => {
+    if (checkoutPlace) {
+      syncGuestCapacity(
+        document.getElementById("checkout-adults"),
+        document.getElementById("checkout-children"),
+        checkoutPlace.max_guest,
+        "adults"
+      );
+    }
+    updateCheckoutSummary();
+  });
+  document.getElementById("checkout-children")?.addEventListener("input", () => {
+    if (checkoutPlace) {
+      syncGuestCapacity(
+        document.getElementById("checkout-adults"),
+        document.getElementById("checkout-children"),
+        checkoutPlace.max_guest,
+        "children"
+      );
+    }
+    updateCheckoutSummary();
+  });
 });

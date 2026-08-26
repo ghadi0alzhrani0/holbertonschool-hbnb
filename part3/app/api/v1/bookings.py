@@ -36,13 +36,11 @@ booking_status_model = bookings_api.model("BookingStatus", {
 guest_model = guests_api.model("BookingGuest", {
     "booking_id": fields.String(required=True),
     "adults_count": fields.Integer(required=True),
-    "children_count": fields.Integer(),
-    "infants_count": fields.Integer()
+    "children_count": fields.Integer()
 })
 guest_update_model = guests_api.model("BookingGuestUpdate", {
     "adults_count": fields.Integer(),
-    "children_count": fields.Integer(),
-    "infants_count": fields.Integer()
+    "children_count": fields.Integer()
 })
 
 
@@ -199,8 +197,11 @@ class BookingGuestList(Resource):
     @jwt_required()
     def post(self):
         """Add guest counts to a booking."""
-        if get_jwt().get("is_owner", False):
-            return {"error": "Owner accounts cannot add booking guests"}, 403
+        claims = get_jwt()
+        if claims.get("is_owner", False) or claims.get("is_admin", False):
+            return {
+                "error": "Management accounts cannot add booking guests"
+            }, 403
         error = _booking_access_error(
             (guests_api.payload or {}).get("booking_id")
         )
@@ -252,6 +253,11 @@ class BookingGuestResource(Resource):
     @jwt_required()
     def put(self, details_id):
         """Update booking guest counts."""
+        claims = get_jwt()
+        if claims.get("is_owner", False) or claims.get("is_admin", False):
+            return {
+                "error": "Management accounts cannot edit booking guests"
+            }, 403
         details = facade.get_extended_resource("booking_guests", details_id)
         if details is None:
             return {"error": "Booking guest details not found"}, 404
@@ -259,8 +265,8 @@ class BookingGuestResource(Resource):
         if error:
             return error
         try:
-            details = facade.update_extended_resource(
-                "booking_guests", details_id, guests_api.payload or {}
+            details = facade.update_booking_guest(
+                details_id, guests_api.payload or {}
             )
         except ValueError as exc:
             return {"error": str(exc)}, 400

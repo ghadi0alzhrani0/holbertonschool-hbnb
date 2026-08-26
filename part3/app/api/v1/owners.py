@@ -194,3 +194,13 @@ class OwnerResource(Resource):
         if owner is None:
             return {"error": "Owner not found"}, 404
         return serialize_owner(owner), 200
+
+    @jwt_required()
+    def delete(self, owner_id):
+        """Delete a business owner and its managed properties."""
+        error = _admin_error()
+        if error:
+            return error
+        if not facade.delete_owner(owner_id):
+            return {"error": "Owner not found"}, 404
+        return {"message": "Owner deleted successfully"}, 200

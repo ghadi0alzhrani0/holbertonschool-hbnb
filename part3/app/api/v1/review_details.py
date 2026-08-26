@@ -77,14 +77,13 @@ def _admin_error():
 
 
 def _review_access_error(review_id):
-    """Allow a review author or administrator to manage rating details."""
+    """Allow only the review author to manage rating details."""
     review = facade.get_review(review_id)
     if review is None:
         return {"error": "Review not found"}, 404
-    if (
-        not get_jwt().get("is_admin", False)
-        and review.user.id != get_jwt_identity()
-    ):
+    if get_jwt().get("is_admin", False):
+        return {"error": "Administrators can only moderate reviews"}, 403
+    if review.user.id != get_jwt_identity():
         return {"error": "Unauthorized action"}, 403
     return None
 
@@ -172,18 +171,17 @@ class ResponseList(Resource):
         """Create an owner response."""
         data = (responses_api.payload or {}).copy()
         claims = get_jwt()
-        if claims.get("is_owner", False):
-            review = facade.get_review(data.get("review_id"))
-            if review is None:
-                return {"error": "Review not found"}, 404
-            if (
-                review.place.business_owner is None
-                or review.place.business_owner.id != get_jwt_identity()
-            ):
-                return {"error": "Unauthorized action"}, 403
-            data["owner_id"] = get_jwt_identity()
-        elif not claims.get("is_admin", False):
+        if not claims.get("is_owner", False):
             return {"error": "Owner account required"}, 403
+        review = facade.get_review(data.get("review_id"))
+        if review is None:
+            return {"error": "Review not found"}, 404
+        if (
+            review.place.business_owner is None
+            or review.place.business_owner.id != get_jwt_identity()
+        ):
+            return {"error": "Unauthorized action"}, 403
+        data["owner_id"] = get_jwt_identity()
         try:
             obj = facade.create_review_response(data)
         except ValueError as exc:
@@ -225,12 +223,9 @@ class ResponseResource(Resource):
         if response is None:
             return {"error": "Review response not found"}, 404
         claims = get_jwt()
-        if (
-            not claims.get("is_admin", False)
-            and not (
-                claims.get("is_owner", False)
-                and response.owner.id == get_jwt_identity()
-            )
+        if not (
+            claims.get("is_owner", False)
+            and response.owner.id == get_jwt_identity()
         ):
             return {"error": "Unauthorized action"}, 403
         return _update(
@@ -255,20 +250,16 @@ class GuestReviewList(Resource):
             return {"error": "Booking not found"}, 404
 
         claims = get_jwt()
-        if claims.get("is_owner", False):
-            if (
-                booking.place.business_owner is None
-                or booking.place.business_owner.id != get_jwt_identity()
-            ):
-                return {"error": "Unauthorized action"}, 403
-            data["owner_id"] = get_jwt_identity()
-        elif not claims.get("is_admin", False):
+        if not claims.get("is_owner", False):
             return {"error": "Owner account required"}, 403
-
         if (
-            not claims.get("is_admin", False)
-            and booking.status != "completed"
+            booking.place.business_owner is None
+            or booking.place.business_owner.id != get_jwt_identity()
         ):
+            return {"error": "Unauthorized action"}, 403
+        data["owner_id"] = get_jwt_identity()
+
+        if booking.status != "completed":
             return {
                 "error": "Guest reviews require a completed booking"
             }, 400
@@ -304,12 +295,9 @@ class GuestReviewResource(Resource):
         if review is None:
             return {"error": "Guest review not found"}, 404
         claims = get_jwt()
-        if (
-            not claims.get("is_admin", False)
-            and not (
-                claims.get("is_owner", False)
-                and review.owner.id == get_jwt_identity()
-            )
+        if not (
+            claims.get("is_owner", False)
+            and review.owner.id == get_jwt_identity()
         ):
             return {"error": "Unauthorized action"}, 403
         return _update(

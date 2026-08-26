@@ -64,7 +64,7 @@ function renderProfileReviews(reviews, places) {
   const placeMap = new Map(places.map((place) => [place.id, place]));
   if (!reviews.length) {
     container.innerHTML = emptyState({
-      icon: "star",
+      icon: "heart",
       title: isManagementAccount() ? "No guest reviews yet" : "No reviews yet",
       text: isManagementAccount()
         ? "Guest feedback for your properties will appear here."
@@ -82,7 +82,7 @@ function renderProfileReviews(reviews, places) {
             ${safe(place?.title || "HBnB stay")}
           </a>
           <span class="profile-review-rating" aria-label="${safe(review.rating)} out of 5">
-            ${lineIcon("star")} ${safe(review.rating)} / 5
+            ${lineIcon("heart")} ${safe(review.rating)} / 5
           </span>
         </div>
         <p>${safe(review.text)}</p>
@@ -104,35 +104,11 @@ function setAccountView(view) {
   });
 }
 
-function initAccountMenu() {
-  const button = document.getElementById("nav-profile");
-  const menu = document.getElementById("account-menu");
-  const closeMenu = () => {
-    menu.hidden = true;
-    button.setAttribute("aria-expanded", "false");
-  };
-
-  button.addEventListener("click", () => {
-    const opening = menu.hidden;
-    menu.hidden = !opening;
-    button.setAttribute("aria-expanded", String(opening));
-  });
+function initAccountViews() {
   document.querySelectorAll("[data-account-view]").forEach((item) => {
     item.addEventListener("click", () => {
       setAccountView(item.dataset.accountView);
-      closeMenu();
     });
-  });
-  document.addEventListener("click", (event) => {
-    if (!event.target.closest("#nav-profile, #account-menu")) {
-      closeMenu();
-    }
-  });
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-      closeMenu();
-      button.focus();
-    }
   });
   setAccountView("activity");
 }
@@ -151,7 +127,7 @@ async function loadProfile() {
     return;
   }
 
-  initAccountMenu();
+  initAccountViews();
   initPasswordVisibility();
   document.getElementById("stat-wishlist").textContent = wishlistIds().length;
   const userId = tokenPayload()?.sub;

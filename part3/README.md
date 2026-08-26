@@ -55,8 +55,11 @@ The sample account credentials are:
 
 ```text
 Guest: guest@hbnb.io / guest1234
+Guest: layan@hbnb.io / Layan@2026
+Guest: hessa@hbnb.io / Hessa@2026
 Owner: owner@hbnb.io / owner1234
 Admin: admin@hbnb.io / admin1234
+Seed host record: host@hbnb.io / host1234
 ```
 
 The password is stored as a bcrypt hash, not as plaintext.

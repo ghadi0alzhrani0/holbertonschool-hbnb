@@ -31,11 +31,9 @@ def _admin_error():
 
 
 def _notification_access_error(notification):
-    """Allow an administrator or the notification recipient."""
+    """Allow only the account that received the notification."""
     claims = get_jwt()
     identity = get_jwt_identity()
-    if claims.get("is_admin", False):
-        return None
     if (
         claims.get("is_owner", False)
         and notification.owner is not None
@@ -66,7 +64,7 @@ class NotificationList(Resource):
 
     @jwt_required()
     def get(self):
-        """Retrieve all notifications."""
+        """Retrieve notifications belonging to the signed-in account."""
         notifications = facade.get_all_extended_resources("notifications")
         claims = get_jwt()
         if claims.get("is_owner", False):
@@ -76,7 +74,7 @@ class NotificationList(Resource):
                 if notification.owner is not None
                 and notification.owner.id == owner_id
             ]
-        elif not claims.get("is_admin", False):
+        else:
             user_id = get_jwt_identity()
             notifications = [
                 notification for notification in notifications
@@ -118,10 +116,7 @@ class NotificationResource(Resource):
         error = _notification_access_error(notification)
         if error:
             return error
-        if (
-            not get_jwt().get("is_admin", False)
-            and set(api.payload or {}) - {"is_seen"}
-        ):
+        if set(api.payload or {}) - {"is_seen"}:
             return {"error": "Unauthorized action"}, 403
         try:
             notification = facade.update_extended_resource(

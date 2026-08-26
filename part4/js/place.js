@@ -16,9 +16,13 @@ async function loadPlacePage() {
   }
 
   const reviewLink = document.getElementById("review-link");
-  reviewLink.href = isAuthenticated() && !isManagementAccount()
-    ? `add_review.html?place_id=${encodeURIComponent(placeId)}`
-    : "login.html";
+  if (isManagementAccount()) {
+    reviewLink.hidden = true;
+  } else {
+    reviewLink.href = isAuthenticated()
+      ? `add_review.html?place_id=${encodeURIComponent(placeId)}`
+      : "login.html";
+  }
 
   if (isManagementAccount()) {
     const bookingForm = document.getElementById("booking-form");
@@ -249,7 +253,9 @@ async function loadReviews(placeId) {
         <article class="review-card">
           <div class="review-head">
             <strong>${safe(userName)}</strong>
-            <span class="review-rating">Rating: ${safe(review.rating)} / 5</span>
+            <span class="review-rating">
+              ${lineIcon("heart")} ${safe(review.rating)} / 5
+            </span>
           </div>
           <p class="place-info">${safe(review.text)}</p>
           ${review.details ? `
@@ -272,7 +278,7 @@ async function loadReviews(placeId) {
       `;
     }).join("")
     : emptyState({
-      icon: "star",
+      icon: "heart",
       title: "No reviews yet",
       text: "Be the first guest to share an experience after a completed stay."
     });
@@ -306,6 +312,16 @@ function updateTotal() {
     return;
   }
 
+  const adultsInput = document.getElementById("adults-count");
+  const childrenInput = document.getElementById("children-count");
+  if (!adultsInput || !childrenInput) {
+    return;
+  }
+  const guestCounts = syncGuestCapacity(
+    adultsInput,
+    childrenInput,
+    place.max_guest
+  );
   const start = document.getElementById("check-in").value;
   const end = document.getElementById("check-out").value;
   if (!start || !end) {
@@ -316,9 +332,6 @@ function updateTotal() {
   }
 
   const nights = numberOfNights(start, end);
-  const guests = ["adults-count", "children-count"]
-    .reduce((total, id) => total + Number(document.getElementById(id).value || 0), 0);
-
   if (end <= start || nights < 1) {
     document.getElementById("estimated-total").textContent = "SAR -";
     document.getElementById("price-breakdown").textContent =
@@ -329,7 +342,7 @@ function updateTotal() {
   const price = nightlyPrice(start);
   document.getElementById("estimated-total").textContent = money(price * nights);
   document.getElementById("price-breakdown").textContent =
-    `${nights} night(s) x ${money(price)} - ${guests} guest(s)`;
+    `${nights} night(s) x ${money(price)} - ${guestCounts.total} guest(s)`;
 
   const unavailable = datesOverlap(start, end);
   const status = document.getElementById("booking-status");
@@ -389,12 +402,35 @@ document.addEventListener("DOMContentLoaded", () => {
     checkOut.value = qs("check_out") || "";
     const guests = Number(qs("guests"));
     if (Number.isFinite(guests) && guests >= 1) {
-      document.getElementById("adults-count").value = String(Math.min(16, guests));
+      document.getElementById("adults-count").value = String(guests);
     }
   }
 
   loadPlacePage();
-  ["check-in", "check-out", "adults-count", "children-count"]
-    .forEach((id) => document.getElementById(id)?.addEventListener("input", updateTotal));
+  ["check-in", "check-out"].forEach((id) => (
+    document.getElementById(id)?.addEventListener("input", updateTotal)
+  ));
+  document.getElementById("adults-count")?.addEventListener("input", () => {
+    if (place) {
+      syncGuestCapacity(
+        document.getElementById("adults-count"),
+        document.getElementById("children-count"),
+        place.max_guest,
+        "adults"
+      );
+    }
+    updateTotal();
+  });
+  document.getElementById("children-count")?.addEventListener("input", () => {
+    if (place) {
+      syncGuestCapacity(
+        document.getElementById("adults-count"),
+        document.getElementById("children-count"),
+        place.max_guest,
+        "children"
+      );
+    }
+    updateTotal();
+  });
   document.getElementById("booking-form")?.addEventListener("submit", createBooking);
 });

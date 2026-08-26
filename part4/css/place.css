@@ -137,8 +137,17 @@
 }
 
 .review-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   color: var(--red);
   font-weight: 900;
+}
+
+.review-rating .line-icon {
+  width: 17px;
+  height: 17px;
+  fill: currentColor;
 }
 
 .place-info {

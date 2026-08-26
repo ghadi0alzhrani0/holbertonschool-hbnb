@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 
 from app import create_app, db
-from app.models import Owner, Place, SystemNotification, User
+from app.models import Booking, Owner, Place, Review, SystemNotification, User
 
 
 class TestAutomaticDatabaseSetup(unittest.TestCase):
@@ -28,17 +28,24 @@ class TestAutomaticDatabaseSetup(unittest.TestCase):
 
             app = create_app(SetupConfig)
             with app.app_context():
-                self.assertEqual(User.query.count(), 3)
+                self.assertEqual(User.query.count(), 5)
                 self.assertEqual(Owner.query.count(), 1)
                 self.assertEqual(Place.query.count(), 6)
-                self.assertEqual(SystemNotification.query.count(), 7)
+                self.assertEqual(Booking.query.count(), 7)
+                self.assertEqual(Review.query.count(), 4)
+                self.assertEqual(SystemNotification.query.count(), 18)
+                Review.query.filter_by(
+                    id="a3000004-0000-4000-8000-000000000004"
+                ).delete()
+                db.session.commit()
                 db.session.remove()
                 db.engine.dispose()
 
             second_app = create_app(SetupConfig)
             with second_app.app_context():
-                self.assertEqual(User.query.count(), 3)
+                self.assertEqual(User.query.count(), 5)
                 self.assertEqual(Place.query.count(), 6)
+                self.assertEqual(Review.query.count(), 3)
                 db.session.remove()
                 db.engine.dispose()
 
